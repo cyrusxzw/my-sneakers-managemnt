@@ -1,10 +1,11 @@
 import './App.css';
-import { Button } from 'antd'
+import Table from './component/table'
+
 
 function App() {
   return (
     <div className="App">
-      <Button color="primary">按钮</Button>
+      <Table />
     </div>
   );
 }
