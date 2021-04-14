@@ -7,10 +7,9 @@ export default class Axios {
         if (options.isShowLoading) {
             loading.style.display = "block";
         }
-        const basicUrl = "/api/table/list";
         return new Promise((resolve, reject) => {
             axios({
-                url: basicUrl,
+                url: options.url,
                 method: options.method,
                 timeout: 5000,
             }).then((res) => {

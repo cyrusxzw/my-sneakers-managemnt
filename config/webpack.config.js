@@ -149,10 +149,9 @@ module.exports = function (webpackEnv) {
         }
       }
       if (preProcessor === "less-loader") {    //新增
-        loader.options.modifyVars =
-          getThemeVariables({
-
-          })
+        loader.options.modifyVars = {
+          'layout-header-background': '#002140',
+        }
         loader.options.javascriptEnabled = true
       }    //EndOf新增
       loaders.push(loader);
