@@ -40,14 +40,15 @@ export default class Sidebar extends React.Component {
     }
 
     componentDidMount() {
-        window.addEventListener('resize', this.debounce(this.onReSize, 1000));
+        window.addEventListener('resize', this.debounce(this.onReSize, 500));
+        this.onReSize();
     }
 
     render() {
         return (
             <div>
                 <Logo />
-                <Menu inlineCollapsed={this.state.collapsed} className="menu-container" theme={this.state.theme} style={{ height: "100vh" }}>
+                <Menu mode="inline" inlineCollapsed={this.state.collapsed} className="menu-container" theme={this.state.theme} style={{ height: "100vh" }}>
                     <SubMenu key="sub1" icon={<SettingOutlined />} title="数据分析">
                         <Menu.Item key="1">1</Menu.Item>
                         <Menu.Item key="2">2</Menu.Item>

@@ -1,11 +1,17 @@
+import './index.less';
 import React from 'react';
 import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker } from 'antd';
 import Axios from '../../axios';
 
+
 export default class Table extends React.Component {
 
     state = {
-        visible: false
+        selectedRowKeys: [],
+        selectedRows: [],
+        visible: false,
+        deleteConfirmVisible: false,
+        buttonDisabled: true
     }
 
     formItemLayout = {
@@ -85,6 +91,10 @@ export default class Table extends React.Component {
     ]
 
     componentDidMount() {
+        this.request();
+    }
+
+    request = () => {
         Axios.ajax({
             url: "/api/table/list",
             method: "get",
@@ -115,10 +125,80 @@ export default class Table extends React.Component {
         this.formRef.current.resetFields();
     }
 
+    onAdd = () => {
+
+    }
+
+    onOpenDelete = () => {
+        this.setState({
+            deleteConfirmVisible: true
+        })
+    }
+
+    onDelete = () => {
+
+
+    }
+
+    onSelectChange = (selectedRowKeys, selectedRows) => {
+        this.setState({
+            selectedRowKeys,
+            selectedRows,
+            buttonDisabled: false
+        });
+    };
+
+    onRowClick = (record) => {
+        const selectedRowKeys = [...this.state.selectedRowKeys];
+        const selectedRows = [...this.state.selectedRows];
+        if (selectedRowKeys.indexOf(record.key) >= 0) {
+            selectedRowKeys.splice(selectedRowKeys.indexOf(record.key), 1);
+            selectedRows.splice(selectedRowKeys.indexOf(record), 1);
+        } else {
+            selectedRowKeys.push(record.key);
+            selectedRows.push(record);
+        }
+        const buttonDisabled = selectedRowKeys.length > 0 ? false : true;
+        this.setState({
+            selectedRowKeys,
+            selectedRows,
+            buttonDisabled
+        });
+    }
+
     render() {
+        const { selectedRowKeys, selectedRows } = this.state;
+        const rowSelection = {
+            selectedRowKeys,
+            onChange: this.onSelectChange,
+        };
+        const selectedContent = selectedRows.map((item, index) => {
+            const title = {
+                title: `所选鞋款 id: ${item.id}`
+            }
+            return (
+                <div className="confrim-delete" key={index}>
+                    <Card {...title}>
+                        <Form>
+                            <Form.Item label="鞋款">
+                                {item.sneaker}
+                            </Form.Item>
+                            <Form.Item label="尺码">
+                                {item.size}
+                            </Form.Item>
+                        </Form>
+                    </Card>
+
+                </div>
+            )
+        })
+
+        const disabled = {
+            disabled: this.state.buttonDisabled ? "disabled" : ""
+        };
 
         return (
-            <div>
+            <div className="table-container">
                 <Card>
                     <Form
                         {...this.formItemLayout}
@@ -181,12 +261,39 @@ export default class Table extends React.Component {
                         </Form.Item>
                     </Form>
                 </Card>
-                <Card>
+                <Card className="inner-table">
+                    <div className="btn-container">
+                        <Button type="primary" onClick={this.onAdd}>添加记录</Button>
+                        <Button danger onClick={this.onOpenDelete} {...disabled}>删除记录</Button>
+                        <Button onClick={this.onEdit}>编辑记录</Button>
+                    </div>
                     <SneakerTable
                         columns={this.columns}
                         dataSource={this.state.dataSource}
+                        rowSelection={rowSelection}
+                        onRow={record => {
+                            return {
+                                onClick: () => {
+                                    this.onRowClick(record);
+                                }
+                            }
+                        }}
                     />
                 </Card>
+                <Modal
+                    title="删除记录"
+                    visible={this.state.deleteConfirmVisible}
+                    onCancel={() => {
+                        this.setState({
+                            deleteConfirmVisible: false
+                        })
+                    }}
+                    onOk={this.onDelete}
+                >
+                    <div className="delect-content-container">
+                        {selectedContent}
+                    </div>
+                </Modal>
             </div>
         )
     }

@@ -15,7 +15,7 @@ Mock.mock('/api/table/list', {
             "soldDate": "08/08/2021",
             "buyer": "@cname",
             "profit": 100,
-            "remarks": "备注"
+            "remarks": "换成某某鞋款us9"
         }]
     }
 })
