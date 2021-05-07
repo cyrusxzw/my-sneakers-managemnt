@@ -1,6 +1,6 @@
 import './index.less';
 import React from 'react';
-import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker } from 'antd';
+import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col } from 'antd';
 import Axios from '../../axios';
 
 
@@ -10,6 +10,7 @@ export default class Table extends React.Component {
         selectedRowKeys: [],
         selectedRows: [],
         visible: false,
+        addVisible: false,
         deleteConfirmVisible: false,
         buttonDisabled: true
     }
@@ -22,6 +23,10 @@ export default class Table extends React.Component {
             span: 16,
         },
     };
+
+    selectedLayout = {
+        span: 12
+    }
 
     columns = [
         {
@@ -125,6 +130,12 @@ export default class Table extends React.Component {
         this.formRef.current.resetFields();
     }
 
+    onOpenAdd = () => {
+        this.setState({
+            addVisible: true
+        })
+    }
+
     onAdd = () => {
 
     }
@@ -180,12 +191,28 @@ export default class Table extends React.Component {
                 <div className="confrim-delete" key={index}>
                     <Card {...title}>
                         <Form>
-                            <Form.Item label="鞋款">
-                                {item.sneaker}
-                            </Form.Item>
-                            <Form.Item label="尺码">
-                                {item.size}
-                            </Form.Item>
+                            <Row>
+                                <Col {...this.selectedLayout}>
+                                    <Form.Item label="鞋款">
+                                        {item.sneaker}
+                                    </Form.Item>
+                                </Col>
+                                <Col {...this.selectedLayout}>
+                                    <Form.Item label="尺码">
+                                        {item.size}
+                                    </Form.Item>
+                                </Col>
+                                <Col {...this.selectedLayout}>
+                                    <Form.Item label="买入价格">
+                                        {item.buyPrice}
+                                    </Form.Item>
+                                </Col>
+                                <Col {...this.selectedLayout}>
+                                    <Form.Item label="是否卖出">
+                                        {item.ifSold}
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                         </Form>
                     </Card>
 
@@ -250,6 +277,7 @@ export default class Table extends React.Component {
                             <Select>
                                 <Select.Option value="all">全部</Select.Option>
                                 <Select.Option value="sold">已卖</Select.Option>
+                                <Select.Option value="deposit">已收定金</Select.Option>
                                 <Select.Option value="notsold">未卖</Select.Option>
                             </Select>
                         </Form.Item>
@@ -263,7 +291,7 @@ export default class Table extends React.Component {
                 </Card>
                 <Card className="inner-table">
                     <div className="btn-container">
-                        <Button type="primary" onClick={this.onAdd}>添加记录</Button>
+                        <Button type="primary" onClick={this.onOpenAdd}>添加记录</Button>
                         <Button danger onClick={this.onOpenDelete} {...disabled}>删除记录</Button>
                         <Button onClick={this.onEdit}>编辑记录</Button>
                     </div>
@@ -281,6 +309,60 @@ export default class Table extends React.Component {
                     />
                 </Card>
                 <Modal
+                    title="添加记录"
+                    visible={this.state.addVisible}
+                    onCancel={() => {
+                        this.setState({
+                            addVisible: false
+                        })
+                    }}
+                    okText="确定"
+                    cancelText="取消"
+                    onOk
+                >
+                    <div className="add-content-container">
+                        <Form>
+                            <Form.Item
+                                label="鞋款"
+                                name="sneaker"
+                                rules={[{ required: true, message: '产品名必须填写!' }]}>
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="尺码" name="size">
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="状态" name="status">
+                                <Select placeholder="请选择">
+                                    <Select.Option value="sold">已卖</Select.Option>
+                                    <Select.Option value="deposit">已收定金</Select.Option>
+                                    <Select.Option value="notsold">未卖</Select.Option>
+                                </Select>
+                            </Form.Item>
+                            <Form.Item label="买入价" name="buyPrice">
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="卖出价" name="soldPrice">
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="买入时间" name="buyDate">
+                                <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
+                            </Form.Item>
+                            <Form.Item label="卖出时间" name="soldDate">
+                                <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
+                            </Form.Item>
+                            <Form.Item label="买家" name="buyer">
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="利润" name="profit">
+                                <Input disabled />
+                            </Form.Item>
+                            <Form.Item label="备注" name="remarks">
+                                <Input />
+                            </Form.Item>
+                        </Form>
+                    </div>
+                </Modal>
+                <Modal
                     title="删除记录"
                     visible={this.state.deleteConfirmVisible}
                     onCancel={() => {
@@ -288,6 +370,8 @@ export default class Table extends React.Component {
                             deleteConfirmVisible: false
                         })
                     }}
+                    okText="确定"
+                    cancelText="取消"
                     onOk={this.onDelete}
                 >
                     <div className="delect-content-container">
