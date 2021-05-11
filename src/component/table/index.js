@@ -1,6 +1,6 @@
 import './index.less';
 import React from 'react';
-import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col } from 'antd';
+import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col, message } from 'antd';
 import Axios from '../../axios';
 
 
@@ -12,7 +12,8 @@ export default class Table extends React.Component {
         visible: false,
         addVisible: false,
         deleteConfirmVisible: false,
-        buttonDisabled: true
+        buttonDisabled: true,
+        hiddenDeposit: true
     }
 
     formItemLayout = {
@@ -28,86 +29,23 @@ export default class Table extends React.Component {
         span: 12
     }
 
-    columns = [
-        {
-            title: 'id',
-            dataIndex: 'id',
-            key: 'id',
-        },
-        {
-            title: '鞋款',
-            dataIndex: 'sneaker',
-            key: 'sneaker',
-            render: (sk) => {
-                const conf = {
-                    "1": "Aj1",
-                    "2": "Dunk",
-                    "3": "Yeezy",
-                    "4": "AJ4"
-                }
-                return conf[sk];
-            }
-        },
-        {
-            title: '尺码',
-            dataIndex: 'size',
-            key: 'size',
-        },
-        {
-            title: '状态',
-            dataIndex: 'ifSold',
-            key: 'status',
-        },
-        {
-            title: '买入价',
-            dataIndex: 'buyPrice',
-            key: 'buyPrice',
-        },
-        {
-            title: '卖出价',
-            dataIndex: 'soldPrice',
-            key: 'soldPrice',
-        },
-        {
-            title: '买入时间',
-            dataIndex: 'buyDate',
-            key: 'buyDate',
-        },
-        {
-            title: '卖出时间',
-            dataIndex: 'soldDate',
-            key: 'soldDate',
-        },
-        {
-            title: '买家',
-            dataIndex: 'buyer',
-            key: 'buyer',
-        },
-        {
-            title: '利润',
-            dataIndex: 'profit',
-            key: 'profit',
-        },
-        {
-            title: '备注',
-            dataIndex: 'remarks',
-            key: 'remarks',
-        }
-    ]
-
     componentDidMount() {
         this.request();
     }
 
     request = () => {
         Axios.ajax({
-            url: "/api/table/list",
+            url: "http://solegood.com.au/wp-json/wp/v2/posts",
             method: "get",
             isShowLoading: true
         }).then((res) => {
-            if (res.data.code === 0) {
-                const list = res.data.result.list.map((item, index) => {
+            if (res.statusText === "OK") {
+                const list = res.data.map((item, index) => {
                     item.key = index;
+                    item = {
+                        ...item,
+                        id: index + 1
+                    }
                     return item;
                 })
                 this.setState({
@@ -146,6 +84,13 @@ export default class Table extends React.Component {
         })
     }
 
+    onOpenEdit = () => {
+        const { selectedRowKeys } = this.state;
+        if (selectedRowKeys.length > 1) {
+            message.error("只能选择一行进行编辑！");
+        }
+    }
+
     onDelete = () => {
 
 
@@ -177,8 +122,113 @@ export default class Table extends React.Component {
         });
     }
 
+    onStatusChange = (value) => {
+        if (value === "deposit") {
+            this.setState({
+                hiddenDeposit: false
+            })
+        } else {
+            this.setState({
+                hiddenDeposit: true
+            })
+        }
+    }
+
     render() {
         const { selectedRowKeys, selectedRows } = this.state;
+
+        const columns = [
+            {
+                title: 'id',
+                dataIndex: 'id',
+                key: 'id',
+            },
+            {
+                title: '鞋款',
+                dataIndex: 'title',
+                key: 'sneaker',
+                render: (title) => {
+                    return title.rendered
+                }
+            },
+            {
+                title: '尺码',
+                dataIndex: 'acf',
+                key: 'size',
+                render: (acf) => {
+                    return acf.size
+                }
+            },
+            {
+                title: '状态',
+                dataIndex: 'acf',
+                key: 'status',
+                render: (acf) => {
+                    if (acf.status === "已收定金") {
+                        return `${acf.status}: ${acf.deposit_amount}`
+                    }
+                    return acf.status
+                }
+            },
+            {
+                title: '买入价',
+                dataIndex: 'acf',
+                key: 'buyPrice',
+                render: (acf) => {
+                    return acf.buy_price
+                }
+            },
+            {
+                title: '卖出价',
+                dataIndex: 'acf',
+                key: 'soldPrice',
+                render: (acf) => {
+                    return acf.sold_price
+                }
+            },
+            {
+                title: '买入时间',
+                dataIndex: 'acf',
+                key: 'buyDate',
+                render: (acf) => {
+                    return acf.buy_date
+                }
+            },
+            {
+                title: '卖出时间',
+                dataIndex: 'acf',
+                key: 'soldDate',
+                render: (acf) => {
+                    return acf.sold_date
+                }
+            },
+            {
+                title: '买家',
+                dataIndex: 'acf',
+                key: 'buyer',
+                render: (acf) => {
+                    return acf.buyer
+                }
+            },
+            {
+                title: '利润',
+                dataIndex: 'acf',
+                key: 'profit',
+                sorter: (a, b) => a.profit - b.profit,
+                render: (acf) => {
+                    return acf.sold_price - acf.buy_price
+                }
+            },
+            {
+                title: '备注',
+                dataIndex: 'acf',
+                key: 'remarks',
+                render: (acf) => {
+                    return acf.remarks
+                }
+            }
+        ]
+
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
@@ -187,6 +237,7 @@ export default class Table extends React.Component {
             const title = {
                 title: `所选鞋款 id: ${item.id}`
             }
+            console.log(item)
             return (
                 <div className="confrim-delete" key={index}>
                     <Card {...title}>
@@ -194,22 +245,22 @@ export default class Table extends React.Component {
                             <Row>
                                 <Col {...this.selectedLayout}>
                                     <Form.Item label="鞋款">
-                                        {item.sneaker}
+                                        {item.title.rendered}
                                     </Form.Item>
                                 </Col>
                                 <Col {...this.selectedLayout}>
                                     <Form.Item label="尺码">
-                                        {item.size}
+                                        {item.acf.size}
                                     </Form.Item>
                                 </Col>
                                 <Col {...this.selectedLayout}>
                                     <Form.Item label="买入价格">
-                                        {item.buyPrice}
+                                        {item.acf.buy_price}
                                     </Form.Item>
                                 </Col>
                                 <Col {...this.selectedLayout}>
                                     <Form.Item label="是否卖出">
-                                        {item.ifSold}
+                                        {item.acf.status}
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -238,7 +289,7 @@ export default class Table extends React.Component {
                         }
                     >
                         <Form.Item label="关键字" name="keywords">
-                            <Input />
+                            <Input placeholder="请输入鞋款名称" />
                         </Form.Item>
                         <Form.Item
                             label="买入时间"
@@ -274,7 +325,7 @@ export default class Table extends React.Component {
                             </Form.Item>
                         </Form.Item>
                         <Form.Item label="库存" name="stock">
-                            <Select>
+                            <Select style={{ width: 100 }}>
                                 <Select.Option value="all">全部</Select.Option>
                                 <Select.Option value="sold">已卖</Select.Option>
                                 <Select.Option value="deposit">已收定金</Select.Option>
@@ -293,10 +344,10 @@ export default class Table extends React.Component {
                     <div className="btn-container">
                         <Button type="primary" onClick={this.onOpenAdd}>添加记录</Button>
                         <Button danger onClick={this.onOpenDelete} {...disabled}>删除记录</Button>
-                        <Button onClick={this.onEdit}>编辑记录</Button>
+                        <Button type="primary" ghost onClick={this.onOpenEdit} {...disabled}>编辑记录</Button>
                     </div>
                     <SneakerTable
-                        columns={this.columns}
+                        columns={columns}
                         dataSource={this.state.dataSource}
                         rowSelection={rowSelection}
                         onRow={record => {
@@ -332,11 +383,17 @@ export default class Table extends React.Component {
                                 <Input />
                             </Form.Item>
                             <Form.Item label="状态" name="status">
-                                <Select placeholder="请选择">
+                                <Select
+                                    placeholder="请选择"
+                                    onChange={this.onStatusChange}
+                                >
                                     <Select.Option value="sold">已卖</Select.Option>
                                     <Select.Option value="deposit">已收定金</Select.Option>
                                     <Select.Option value="notsold">未卖</Select.Option>
                                 </Select>
+                            </Form.Item>
+                            <Form.Item hidden={this.state.hiddenDeposit} label="付了多少定金?" name="depositAmount">
+                                <Input />
                             </Form.Item>
                             <Form.Item label="买入价" name="buyPrice">
                                 <Input />
