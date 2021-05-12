@@ -12,6 +12,7 @@ export default class Axios {
                 url: options.url,
                 method: options.method,
                 timeout: 5000,
+                data: options.data
             }).then((res) => {
                 loading.style.display = "none";
                 if (res.status === 200) {

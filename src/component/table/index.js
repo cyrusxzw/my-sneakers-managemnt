@@ -7,6 +7,8 @@ import Axios from '../../axios';
 export default class Table extends React.Component {
 
     state = {
+        dataSource: [],
+        authenticKey: null,
         selectedRowKeys: [],
         selectedRows: [],
         visible: false,
@@ -31,6 +33,7 @@ export default class Table extends React.Component {
 
     componentDidMount() {
         this.request();
+        this.authentic();
     }
 
     request = () => {
@@ -62,6 +65,22 @@ export default class Table extends React.Component {
         })
     }
 
+    authentic = () => {
+        Axios.ajax({
+            url: 'http://solegood.com.au/wp-json/jwt-auth/v1/token',
+            method: 'post',
+            data: {
+                username: 'cyrusxzw',
+                password: 'P@55word!@#'
+            }
+        }).then(res => res.data)
+            .then((data) => {
+                this.setState({
+                    authenticKey: data.token
+                })
+            })
+    }
+
     formRef = React.createRef();
 
     onReset = () => {
@@ -72,10 +91,6 @@ export default class Table extends React.Component {
         this.setState({
             addVisible: true
         })
-    }
-
-    onAdd = () => {
-
     }
 
     onOpenDelete = () => {
@@ -89,11 +104,6 @@ export default class Table extends React.Component {
         if (selectedRowKeys.length > 1) {
             message.error("只能选择一行进行编辑！");
         }
-    }
-
-    onDelete = () => {
-
-
     }
 
     onSelectChange = (selectedRowKeys, selectedRows) => {
@@ -135,8 +145,7 @@ export default class Table extends React.Component {
     }
 
     render() {
-        const { selectedRowKeys, selectedRows } = this.state;
-
+        const { selectedRowKeys, selectedRows, dataSource } = this.state;
         const columns = [
             {
                 title: 'id',
@@ -214,7 +223,13 @@ export default class Table extends React.Component {
                 title: '利润',
                 dataIndex: 'acf',
                 key: 'profit',
-                sorter: (a, b) => a.profit - b.profit,
+                sorter: (a, b) => {
+                    const a_profit = a.acf.sold_price - a.acf.buy_price;
+                    const b_profit = b.acf.sold_price - b.acf.buy_price;
+                    return (
+                        a_profit - b_profit
+                    )
+                },
                 render: (acf) => {
                     return acf.sold_price - acf.buy_price
                 }
@@ -348,7 +363,7 @@ export default class Table extends React.Component {
                     </div>
                     <SneakerTable
                         columns={columns}
-                        dataSource={this.state.dataSource}
+                        dataSource={dataSource}
                         rowSelection={rowSelection}
                         onRow={record => {
                             return {
@@ -415,6 +430,11 @@ export default class Table extends React.Component {
                             </Form.Item>
                             <Form.Item label="备注" name="remarks">
                                 <Input />
+                            </Form.Item>
+                            <Form.Item >
+                                <Button type="primary" htmlType="submit">
+                                    添加
+                                </Button>
                             </Form.Item>
                         </Form>
                     </div>
