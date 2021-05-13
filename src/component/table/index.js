@@ -42,6 +42,7 @@ export default class Table extends React.Component {
             method: "get",
             isShowLoading: true
         }).then((res) => {
+            console.log(res)
             if (res.statusText === "OK") {
                 const list = res.data.map((item, index) => {
                     item.key = index;
@@ -69,9 +70,14 @@ export default class Table extends React.Component {
         Axios.ajax({
             url: 'http://solegood.com.au/wp-json/jwt-auth/v1/token',
             method: 'post',
+            isShowLoading: false,
             data: {
                 username: 'cyrusxzw',
                 password: 'P@55word!@#'
+            },
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
             }
         }).then(res => res.data)
             .then((data) => {
@@ -90,6 +96,39 @@ export default class Table extends React.Component {
     onOpenAdd = () => {
         this.setState({
             addVisible: true
+        })
+    }
+
+    onFinish = (values) => {
+        this.setState({
+            addVisible: false,
+        })
+        this.addNewSneaker(values);
+    };
+
+    addNewSneaker = (record) => {
+        const { authenticKey } = this.state;
+        Axios.ajax({
+            url: 'http://solegood.com.au/wp-json/wp/v2/posts',
+            method: 'post',
+            isShowLoading: false,
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${authenticKey}`
+            },
+            data: {
+                title: record.sneaker,
+                content: '',
+                status: 'publish',
+                acf_fields: {
+                    size: 'us10'
+                }
+            }
+        }).then((res) => {
+            const sneaker = res.data.title.rendered;
+            message.success(`鞋款: ${sneaker}，已经成功添加!`);
+            this.request();
         })
     }
 
@@ -252,7 +291,6 @@ export default class Table extends React.Component {
             const title = {
                 title: `所选鞋款 id: ${item.id}`
             }
-            console.log(item)
             return (
                 <div className="confrim-delete" key={index}>
                     <Card {...title}>
@@ -365,6 +403,7 @@ export default class Table extends React.Component {
                         columns={columns}
                         dataSource={dataSource}
                         rowSelection={rowSelection}
+                        pagination={{ pageSize: 25 }}
                         onRow={record => {
                             return {
                                 onClick: () => {
@@ -382,12 +421,26 @@ export default class Table extends React.Component {
                             addVisible: false
                         })
                     }}
-                    okText="确定"
-                    cancelText="取消"
-                    onOk
+                    footer={
+                        [
+                            <Button key="cancel" onClick={() => {
+                                this.setState({
+                                    addVisible: false
+                                })
+                            }}>
+                                取消
+                            </Button>,
+                            <Button form="addSneakerForm" key="submit" htmlType="submit">
+                                确定
+                            </Button>
+                        ]
+                    }
                 >
                     <div className="add-content-container">
-                        <Form>
+                        <Form
+                            id="addSneakerForm"
+                            onFinish={this.onFinish}
+                        >
                             <Form.Item
                                 label="鞋款"
                                 name="sneaker"
@@ -430,11 +483,6 @@ export default class Table extends React.Component {
                             </Form.Item>
                             <Form.Item label="备注" name="remarks">
                                 <Input />
-                            </Form.Item>
-                            <Form.Item >
-                                <Button type="primary" htmlType="submit">
-                                    添加
-                                </Button>
                             </Form.Item>
                         </Form>
                     </div>

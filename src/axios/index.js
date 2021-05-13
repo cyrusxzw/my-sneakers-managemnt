@@ -12,10 +12,11 @@ export default class Axios {
                 url: options.url,
                 method: options.method,
                 timeout: 5000,
-                data: options.data
+                data: options.data,
+                headers: options.headers
             }).then((res) => {
                 loading.style.display = "none";
-                if (res.status === 200) {
+                if (res.status === 200 || res.status === 201) {
                     resolve(res);
                 } else {
                     reject(new Error("连接错误，无法访问数据！"))
