@@ -21,7 +21,7 @@ export default class Axios {
                 } else {
                     reject(new Error("连接错误，无法访问数据！"))
                 }
-            })
+            }).catch(() => console.log("出错啦"))
         })
     }
 }

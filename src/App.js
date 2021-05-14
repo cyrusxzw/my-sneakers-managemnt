@@ -6,7 +6,7 @@ import Header from './section/header';
 function App() {
   return (
     <Row>
-      <Col span={3}>
+      <Col span={3} style={{ 'backgroundColor': '#002140' }}>
         <Sidebar />
       </Col>
       <Col span={21}>

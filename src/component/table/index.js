@@ -1,7 +1,8 @@
 import './index.less';
 import React from 'react';
-import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col, message } from 'antd';
+import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col, message, InputNumber } from 'antd';
 import Axios from '../../axios';
+import axios from 'axios';
 
 
 export default class Table extends React.Component {
@@ -42,13 +43,13 @@ export default class Table extends React.Component {
             method: "get",
             isShowLoading: true
         }).then((res) => {
-            console.log(res)
+            //console.log(res)
             if (res.statusText === "OK") {
                 const list = res.data.map((item, index) => {
                     item.key = index;
                     item = {
                         ...item,
-                        id: index + 1
+                        newId: index + 1
                     }
                     return item;
                 })
@@ -100,9 +101,6 @@ export default class Table extends React.Component {
     }
 
     onFinish = (values) => {
-        this.setState({
-            addVisible: false,
-        })
         this.addNewSneaker(values);
     };
 
@@ -122,11 +120,22 @@ export default class Table extends React.Component {
                 content: '',
                 status: 'publish',
                 acf_fields: {
-                    size: 'us10'
+                    size: record.size,
+                    buy_price: record.buyPrice,
+                    buy_date: record.buyDate,
+                    buyer: record.buyer,
+                    status: record.status,
+                    deposit_amount: record.depositAmount,
+                    sold_date: record.soldDate,
+                    sold_price: record.soldPrice,
+                    remarks: record.remarks
                 }
             }
         }).then((res) => {
             const sneaker = res.data.title.rendered;
+            this.setState({
+                addVisible: false,
+            })
             message.success(`鞋款: ${sneaker}，已经成功添加!`);
             this.request();
         })
@@ -138,10 +147,55 @@ export default class Table extends React.Component {
         })
     }
 
+    onDelete = () => {
+        const { selectedRows, authenticKey } = this.state;
+        const ids = selectedRows.map((item) => {
+            return item.id;
+        })
+        const newIds = selectedRows.map((item) => {
+            return item.newId;
+        })
+        //console.log(ids);
+        const allRequests = ids.map((item) => {
+            return (
+                Axios.ajax({
+                    url: `http://solegood.com.au/wp-json/wp/v2/posts/${item}?force=true`,
+                    isShowLoading: true,
+                    method: 'delete',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'accept': 'application/json',
+                        'Authorization': `Bearer ${authenticKey}`
+                    }
+                })
+            )
+        })
+        axios.all(allRequests).then(axios.spread((...responses) => {
+            const isOK = responses.every((element) => element.status === 200);
+            if (isOK) {
+                this.setState({
+                    deleteConfirmVisible: false,
+                    selectedRowKeys: [],
+                    selectedRows: [],
+                    buttonDisabled: true
+                })
+                message.success(`记录:${newIds}已经成功删除！`);
+                this.request();
+            } else {
+                message.error("删除失败了！");
+            }
+
+        })).catch(errors => new Error(`失败了！请联系管理员！---${errors}`))
+    }
+
     onOpenEdit = () => {
         const { selectedRowKeys } = this.state;
         if (selectedRowKeys.length > 1) {
             message.error("只能选择一行进行编辑！");
+        } else {
+            this.setState({
+
+            })
         }
     }
 
@@ -172,7 +226,7 @@ export default class Table extends React.Component {
     }
 
     onStatusChange = (value) => {
-        if (value === "deposit") {
+        if (value === "已收定金") {
             this.setState({
                 hiddenDeposit: false
             })
@@ -188,8 +242,8 @@ export default class Table extends React.Component {
         const columns = [
             {
                 title: 'id',
-                dataIndex: 'id',
-                key: 'id',
+                dataIndex: 'newId',
+                key: 'newId',
             },
             {
                 title: '鞋款',
@@ -270,7 +324,11 @@ export default class Table extends React.Component {
                     )
                 },
                 render: (acf) => {
-                    return acf.sold_price - acf.buy_price
+                    if (acf.sold_price) {
+                        return acf.sold_price - acf.buy_price
+                    } else {
+                        return 0 - acf.buy_price
+                    }
                 }
             },
             {
@@ -289,7 +347,7 @@ export default class Table extends React.Component {
         };
         const selectedContent = selectedRows.map((item, index) => {
             const title = {
-                title: `所选鞋款 id: ${item.id}`
+                title: `所选鞋款 id: ${item.newId}`
             }
             return (
                 <div className="confrim-delete" key={index}>
@@ -455,19 +513,27 @@ export default class Table extends React.Component {
                                     placeholder="请选择"
                                     onChange={this.onStatusChange}
                                 >
-                                    <Select.Option value="sold">已卖</Select.Option>
-                                    <Select.Option value="deposit">已收定金</Select.Option>
-                                    <Select.Option value="notsold">未卖</Select.Option>
+                                    <Select.Option value="已卖">已卖</Select.Option>
+                                    <Select.Option value="已收定金">已收定金</Select.Option>
+                                    <Select.Option value="未卖">未卖</Select.Option>
                                 </Select>
                             </Form.Item>
-                            <Form.Item hidden={this.state.hiddenDeposit} label="付了多少定金?" name="depositAmount">
-                                <Input />
+                            <Form.Item
+                                hidden={this.state.hiddenDeposit}
+                                label="付了多少定金?"
+                                name="depositAmount"
+                            >
+                                <InputNumber min={0} style={{ 'width': '100%' }} />
                             </Form.Item>
-                            <Form.Item label="买入价" name="buyPrice">
-                                <Input />
+                            <Form.Item
+                                label="买入价"
+                                name="buyPrice"
+                                rules={[{ required: true, message: '买入价必须填写!' }]}
+                            >
+                                <InputNumber min={0} style={{ 'width': '100%' }} />
                             </Form.Item>
                             <Form.Item label="卖出价" name="soldPrice">
-                                <Input />
+                                <InputNumber min={0} style={{ 'width': '100%' }} />
                             </Form.Item>
                             <Form.Item label="买入时间" name="buyDate">
                                 <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
@@ -477,9 +543,6 @@ export default class Table extends React.Component {
                             </Form.Item>
                             <Form.Item label="买家" name="buyer">
                                 <Input />
-                            </Form.Item>
-                            <Form.Item label="利润" name="profit">
-                                <Input disabled />
                             </Form.Item>
                             <Form.Item label="备注" name="remarks">
                                 <Input />
