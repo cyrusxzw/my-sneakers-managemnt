@@ -3,12 +3,13 @@ import React from 'react';
 import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col, message, InputNumber } from 'antd';
 import Axios from '../../axios';
 import axios from 'axios';
-
+import Util from '../../utils';
 
 export default class Table extends React.Component {
 
     state = {
         dataSource: [],
+        totalPage: 0,
         authenticKey: null,
         selectedRowKeys: [],
         selectedRows: [],
@@ -43,27 +44,43 @@ export default class Table extends React.Component {
             method: "get",
             isShowLoading: true
         }).then((res) => {
-            //console.log(res)
-            if (res.statusText === "OK") {
-                const list = res.data.map((item, index) => {
-                    item.key = index;
-                    item = {
-                        ...item,
-                        newId: index + 1
-                    }
-                    return item;
-                })
-                this.setState({
-                    dataSource: list
-                })
-            } else {
-                Modal.error({
-                    visible: this.state.visible,
-                    title: '错误',
-                    content: "连接错误，无法访问数据！",
-                    okText: "取消"
-                })
-            }
+            const totalPages = Util.getTotalPages(res.headers['x-wp-totalpages']);
+            const allData = totalPages.map((page) => {
+                return (
+                    Axios.ajax({
+                        url: `http://solegood.com.au/wp-json/wp/v2/posts?page=${page}`,
+                        method: "get",
+                        isShowLoading: true
+                    })
+                )
+            })
+            axios.all(allData).then(axios.spread((...responses) => {
+                const isOK = responses.every((element) => element.status === 200);
+                if (isOK) {
+                    const tempArr = [...responses.map(item => item.data)];
+                    const arr = tempArr.flat();
+                    const list = arr.map((item, index) => {
+                        item.key = index;
+                        item = {
+                            ...item,
+                            newId: index + 1
+                        }
+                        return item;
+                    })
+                    this.setState({
+                        dataSource: list
+                    })
+
+                } else {
+                    Modal.error({
+                        visible: this.state.visible,
+                        title: '错误',
+                        content: "连接错误，无法访问数据！",
+                        okText: "取消"
+                    })
+                }
+
+            })).catch(errors => new Error(`数据无法加载！请联系管理员！---${errors}`))
         })
     }
 
@@ -136,8 +153,8 @@ export default class Table extends React.Component {
             this.setState({
                 addVisible: false,
             })
-            message.success(`鞋款: ${sneaker}，已经成功添加!`);
             this.request();
+            message.success(`鞋款: ${sneaker}，已经成功添加!`);
         })
     }
 
@@ -179,8 +196,8 @@ export default class Table extends React.Component {
                     selectedRows: [],
                     buttonDisabled: true
                 })
-                message.success(`记录:${newIds}已经成功删除！`);
                 this.request();
+                message.success(`记录:${newIds}已经成功删除！`);
             } else {
                 message.error("删除失败了！");
             }
@@ -461,7 +478,7 @@ export default class Table extends React.Component {
                         columns={columns}
                         dataSource={dataSource}
                         rowSelection={rowSelection}
-                        pagination={{ pageSize: 25 }}
+                        pagination
                         onRow={record => {
                             return {
                                 onClick: () => {
