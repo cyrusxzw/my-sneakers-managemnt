@@ -6,16 +6,16 @@ const util = {
         }
         return totalPages;
     },
-    pagination(data, callback) {
+    pagination(currentPage, totalPage, totalRecords, callback) {
         const page = {
             onChange: (current) => {
                 callback(current);
             },
-            current: data.page,
+            current: currentPage,
             pageSize: 10,
-            total: data.total,
+            total: totalPage,
             showTotal: () => {
-                return `共${data}条`
+                return `共${totalRecords}条`
             },
             showQuickJumper: true
         }

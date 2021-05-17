@@ -9,11 +9,14 @@ export default class Table extends React.Component {
 
     state = {
         dataSource: [],
-        totalPage: 0,
+        totalPage: null,
+        currentPage: 1,
+        totalRecords: null,
         authenticKey: null,
         selectedRowKeys: [],
         selectedRows: [],
         visible: false,
+        editVisible: false,
         addVisible: false,
         deleteConfirmVisible: false,
         buttonDisabled: true,
@@ -45,6 +48,7 @@ export default class Table extends React.Component {
             isShowLoading: true
         }).then((res) => {
             const totalPages = Util.getTotalPages(res.headers['x-wp-totalpages']);
+            const totalRecords = res.headers['x-wp-total'];
             const allData = totalPages.map((page) => {
                 return (
                     Axios.ajax({
@@ -68,6 +72,9 @@ export default class Table extends React.Component {
                         return item;
                     })
                     this.setState({
+                        totalRecords,
+                        selectedRowKeys: [],
+                        selectedRows: [],
                         dataSource: list
                     })
 
@@ -211,9 +218,53 @@ export default class Table extends React.Component {
             message.error("只能选择一行进行编辑！");
         } else {
             this.setState({
-
+                editVisible: true
             })
         }
+    }
+
+    defaultValues = () => {
+        const { selectedRows } = this.state;
+        return {
+            sneaker: selectedRows.length > 0 ? selectedRows[0].title.rendered : ""
+        }
+    }
+
+    editSneakerForm = (record) => {
+        const { authenticKey, selectedRows } = this.state;
+        const postId = selectedRows[0].id;
+        Axios.ajax({
+            url: `http://solegood.com.au/wp-json/wp/v2/posts/${postId}`,
+            method: 'put',
+            isShowLoading: false,
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${authenticKey}`
+            },
+            data: {
+                title: record.sneaker,
+                content: '',
+                acf_fields: {
+                    size: record.size,
+                    buy_price: record.buyPrice,
+                    buy_date: record.buyDate,
+                    buyer: record.buyer,
+                    status: record.status,
+                    deposit_amount: record.depositAmount,
+                    sold_date: record.soldDate,
+                    sold_price: record.soldPrice,
+                    remarks: record.remarks
+                }
+            }
+        }).then((res) => {
+            console.log(res);
+            this.setState({
+                editVisible: false,
+            })
+            this.request();
+            message.success(`已经成功编辑!`);
+        })
     }
 
     onSelectChange = (selectedRowKeys, selectedRows) => {
@@ -229,7 +280,7 @@ export default class Table extends React.Component {
         const selectedRows = [...this.state.selectedRows];
         if (selectedRowKeys.indexOf(record.key) >= 0) {
             selectedRowKeys.splice(selectedRowKeys.indexOf(record.key), 1);
-            selectedRows.splice(selectedRowKeys.indexOf(record), 1);
+            selectedRows.splice(selectedRows.indexOf(record), 1);
         } else {
             selectedRowKeys.push(record.key);
             selectedRows.push(record);
@@ -334,8 +385,8 @@ export default class Table extends React.Component {
                 dataIndex: 'acf',
                 key: 'profit',
                 sorter: (a, b) => {
-                    const a_profit = a.acf.sold_price - a.acf.buy_price;
-                    const b_profit = b.acf.sold_price - b.acf.buy_price;
+                    const a_profit = typeof (a.acf.sold_price) == 'undefined' ? 0 - a.acf.buy_price : a.acf.sold_price - a.acf.buy_price;
+                    const b_profit = typeof (b.acf.sold_price) == 'undefined' ? 0 - b.acf.buy_price : b.acf.sold_price - b.acf.buy_price;
                     return (
                         a_profit - b_profit
                     )
@@ -362,6 +413,7 @@ export default class Table extends React.Component {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
+
         const selectedContent = selectedRows.map((item, index) => {
             const title = {
                 title: `所选鞋款 id: ${item.newId}`
@@ -478,7 +530,11 @@ export default class Table extends React.Component {
                         columns={columns}
                         dataSource={dataSource}
                         rowSelection={rowSelection}
-                        pagination
+                        pagination={Util.pagination(this.state.currentPage, this.state.totalPage, this.state.totalRecords, (current) => {
+                            this.setState({
+                                currentPage: current
+                            })
+                        })}
                         onRow={record => {
                             return {
                                 onClick: () => {
@@ -583,6 +639,91 @@ export default class Table extends React.Component {
                         {selectedContent}
                     </div>
                 </Modal>
+
+                <Modal
+                    title="编辑记录"
+                    visible={this.state.editVisible}
+                    onCancel={() => {
+                        this.setState({
+                            editVisible: false
+                        })
+                    }}
+                    footer={
+                        [
+                            <Button key="cancel" onClick={() => {
+                                this.setState({
+                                    editVisible: false
+                                })
+                            }}>
+                                取消
+                            </Button>,
+                            <Button form="editSneakerForm" key="submit" htmlType="submit">
+                                确定
+                            </Button>
+                        ]
+                    }
+                >
+                    <div className="edit-content-container">
+                        <Form
+                            id="editSneakerForm"
+                            initialValues={
+                                this.defaultValues()
+                            }
+                            onFinish={this.editSneakerForm}
+                        >
+                            <Form.Item
+                                label="鞋款"
+                                name="sneaker"
+                                rules={[{ required: true, message: '产品名必须填写!' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="尺码" name="size">
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="状态" name="status">
+                                <Select
+                                    placeholder="请选择"
+                                    onChange={this.onStatusChange}
+                                >
+                                    <Select.Option value="已卖">已卖</Select.Option>
+                                    <Select.Option value="已收定金">已收定金</Select.Option>
+                                    <Select.Option value="未卖">未卖</Select.Option>
+                                </Select>
+                            </Form.Item>
+                            <Form.Item
+                                hidden={this.state.hiddenDeposit}
+                                label="付了多少定金?"
+                                name="depositAmount"
+                            >
+                                <InputNumber min={0} style={{ 'width': '100%' }} />
+                            </Form.Item>
+                            <Form.Item
+                                label="买入价"
+                                name="buyPrice"
+                                rules={[{ required: true, message: '买入价必须填写!' }]}
+                            >
+                                <InputNumber min={0} style={{ 'width': '100%' }} />
+                            </Form.Item>
+                            <Form.Item label="卖出价" name="soldPrice">
+                                <InputNumber min={0} style={{ 'width': '100%' }} />
+                            </Form.Item>
+                            <Form.Item label="买入时间" name="buyDate">
+                                <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
+                            </Form.Item>
+                            <Form.Item label="卖出时间" name="soldDate">
+                                <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
+                            </Form.Item>
+                            <Form.Item label="买家" name="buyer">
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="备注" name="remarks">
+                                <Input />
+                            </Form.Item>
+                        </Form>
+                    </div>
+                </Modal>
+
             </div>
         )
     }
