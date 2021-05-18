@@ -1,6 +1,7 @@
 import Logo from '../logo/index.js';
 import './index.less';
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { Menu } from 'antd';
 import { AppstoreOutlined, SettingOutlined } from '@ant-design/icons';
 const { SubMenu } = Menu;
@@ -47,15 +48,15 @@ export default class Sidebar extends React.Component {
     render() {
         return (
             <div>
-                <Logo />
+                <NavLink to="/"><Logo /></NavLink>
                 <Menu mode="inline" inlineCollapsed={this.state.collapsed} className="menu-container" theme={this.state.theme} style={{ height: "100vh" }}>
-                    <SubMenu key="sub1" icon={<SettingOutlined />} title="数据分析">
-                        <Menu.Item key="1">1</Menu.Item>
-                        <Menu.Item key="2">2</Menu.Item>
-                    </SubMenu>
                     <SubMenu key="sub2" icon={<AppstoreOutlined />} title="管理">
-                        <Menu.Item key="3">3</Menu.Item>
-                        <Menu.Item key="4">4</Menu.Item>
+                        <Menu.Item key="1"><NavLink to="/managment">数据统计</NavLink></Menu.Item>
+                        <Menu.Item key="2">正在开发中</Menu.Item>
+                    </SubMenu>
+                    <SubMenu key="sub1" icon={<SettingOutlined />} title="数据分析">
+                        <Menu.Item key="3">报告</Menu.Item>
+                        <Menu.Item key="4">图表</Menu.Item>
                     </SubMenu>
                 </Menu>
             </div>

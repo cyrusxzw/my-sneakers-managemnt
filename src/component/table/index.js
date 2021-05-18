@@ -1,6 +1,7 @@
 import './index.less';
 import React from 'react';
 import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col, message, InputNumber } from 'antd';
+import moment from 'moment';
 import Axios from '../../axios';
 import axios from 'axios';
 import Util from '../../utils';
@@ -114,13 +115,16 @@ export default class Table extends React.Component {
 
     formRef = React.createRef();
 
+    formUpdate = React.createRef();
+
     onReset = () => {
         this.formRef.current.resetFields();
     }
 
     onOpenAdd = () => {
         this.setState({
-            addVisible: true
+            addVisible: true,
+            hiddenDeposit: true
         })
     }
 
@@ -213,20 +217,63 @@ export default class Table extends React.Component {
     }
 
     onOpenEdit = () => {
-        const { selectedRowKeys } = this.state;
+        const { selectedRowKeys, selectedRows } = this.state;
         if (selectedRowKeys.length > 1) {
             message.error("只能选择一行进行编辑！");
         } else {
             this.setState({
                 editVisible: true
             })
-        }
-    }
+            const isReady = this.formUpdate.current;
+            const base = selectedRows[0].acf;
+            const baseValues = {
+                sneaker: selectedRows[0].title.rendered,
+                size: base.size,
+                status: base.status,
+                buyPrice: base.buy_price,
+                soldPrice: base.sold_price,
+                buyDate: moment(base.buy_date, 'YYYY-MM-DD'),
+                soldDate: base.sold_date ? moment(base.sold_date, 'YYYY-MM-DD') : "",
+                buyer: base.buyer,
+                remarks: base.remarks
+            }
+            let formValues = null;
+            if (base.status === "已收定金") {
+                formValues = { ...baseValues, depositAmount: base.deposit_amount }
+                this.setState({
+                    hiddenDeposit: false
+                })
+            } else {
+                formValues = { ...baseValues, depositAmount: "" }
+                this.setState({
+                    hiddenDeposit: true
+                })
+            }
 
-    defaultValues = () => {
-        const { selectedRows } = this.state;
-        return {
-            sneaker: selectedRows.length > 0 ? selectedRows[0].title.rendered : ""
+            this.setState({
+                initialValues: formValues
+            })
+
+            if (isReady) {
+                if (base.status === "已收定金") {
+                    this.formUpdate.current.setFieldsValue({
+                        ...baseValues,
+                        depositAmount: base.deposit_amount
+                    })
+                    this.setState({
+                        hiddenDeposit: false
+                    })
+                } else {
+                    this.formUpdate.current.setFieldsValue({
+                        ...baseValues,
+                        depositAmount: ""
+                    });
+                    this.setState({
+                        hiddenDeposit: true
+                    })
+                }
+
+            }
         }
     }
 
@@ -258,7 +305,6 @@ export default class Table extends React.Component {
                 }
             }
         }).then((res) => {
-            console.log(res);
             this.setState({
                 editVisible: false,
             })
@@ -666,9 +712,8 @@ export default class Table extends React.Component {
                     <div className="edit-content-container">
                         <Form
                             id="editSneakerForm"
-                            initialValues={
-                                this.defaultValues()
-                            }
+                            ref={this.formUpdate}
+                            initialValues={this.state.initialValues}
                             onFinish={this.editSneakerForm}
                         >
                             <Form.Item
