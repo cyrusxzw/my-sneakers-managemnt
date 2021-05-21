@@ -12,7 +12,7 @@ export default class Header extends React.Component {
     }
 
     componentDidMount() {
-        this.getWeatherAPIData();
+        // this.getWeatherAPIData();
     }
 
     getWeatherAPIData() {
@@ -41,12 +41,11 @@ export default class Header extends React.Component {
                     <Col span="4">
                         <PageHeader
                             className="site-page-header"
-                            title="统计数据"
+                            title="球鞋管理"
                             subTitle="v2.1.1"
                         />
                     </Col>
                     <Col span="20" className="weather">
-                        <span className="date">{this.state.sysTime}</span>
                         <span className="weather-img">
                             <img src={this.state.picUrl} alt="" />
                         </span>

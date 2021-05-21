@@ -2,6 +2,7 @@ import { HashRouter, Route } from 'react-router-dom';
 import { Row, Col } from 'antd';
 import Sidebar from './section/sidebar/index.js'
 import Table from './component/table';
+import Report from './component/report/';
 import Header from './section/header';
 import './App.less';
 
@@ -22,6 +23,7 @@ function App() {
             )
           }} />
           <Route exact path="/managment" component={Table} />
+          <Route exact path="/report" component={Report} />
         </Col>
       </Row>
     </HashRouter>

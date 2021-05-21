@@ -5,6 +5,7 @@ import moment from 'moment';
 import Axios from '../../axios';
 import axios from 'axios';
 import Util from '../../utils';
+import Search from '../search.js';
 
 export default class Table extends React.Component {
 
@@ -76,7 +77,9 @@ export default class Table extends React.Component {
                         totalRecords,
                         selectedRowKeys: [],
                         selectedRows: [],
-                        dataSource: list
+                        dataSource: list,
+                        buttonDisabled: true,
+                        deleteConfirmVisible: false,
                     })
 
                 } else {
@@ -113,13 +116,7 @@ export default class Table extends React.Component {
             })
     }
 
-    formRef = React.createRef();
-
     formUpdate = React.createRef();
-
-    onReset = () => {
-        this.formRef.current.resetFields();
-    }
 
     onOpenAdd = () => {
         this.setState({
@@ -202,7 +199,6 @@ export default class Table extends React.Component {
             const isOK = responses.every((element) => element.status === 200);
             if (isOK) {
                 this.setState({
-                    deleteConfirmVisible: false,
                     selectedRowKeys: [],
                     selectedRows: [],
                     buttonDisabled: true
@@ -232,8 +228,8 @@ export default class Table extends React.Component {
                 status: base.status,
                 buyPrice: base.buy_price,
                 soldPrice: base.sold_price,
-                buyDate: moment(base.buy_date, 'YYYY-MM-DD'),
-                soldDate: base.sold_date ? moment(base.sold_date, 'YYYY-MM-DD') : "",
+                buyDate: moment(base.buy_date, 'DD-MM-YYYY'),
+                soldDate: base.sold_date ? moment(base.sold_date, 'DD-MM-YYYY') : "",
                 buyer: base.buyer,
                 remarks: base.remarks
             }
@@ -280,6 +276,15 @@ export default class Table extends React.Component {
     editSneakerForm = (record) => {
         const { authenticKey, selectedRows } = this.state;
         const postId = selectedRows[0].id;
+        if (record.buyDate) {
+            record.buyDate.add(1, "day");
+        }
+        if (record.soldDate !== "") {
+            record.soldDate.add(1, "day");
+        }
+        this.setState({
+            editVisible: false
+        })
         Axios.ajax({
             url: `http://solegood.com.au/wp-json/wp/v2/posts/${postId}`,
             method: 'put',
@@ -305,9 +310,6 @@ export default class Table extends React.Component {
                 }
             }
         }).then((res) => {
-            this.setState({
-                editVisible: false,
-            })
             this.request();
             message.success(`已经成功编辑!`);
         })
@@ -349,6 +351,12 @@ export default class Table extends React.Component {
                 hiddenDeposit: true
             })
         }
+    }
+
+    handleSearch = (data) => {
+        this.setState({
+            dataSource: data
+        })
     }
 
     render() {
@@ -503,69 +511,7 @@ export default class Table extends React.Component {
 
         return (
             <div className="table-container">
-                <Card>
-                    <Form
-                        {...this.formItemLayout}
-                        layout="inline"
-                        ref={this.formRef}
-                        initialValues={
-                            {
-                                stock: 'all'
-                            }
-                        }
-                    >
-                        <Form.Item label="关键字" name="keywords">
-                            <Input placeholder="请输入鞋款名称" />
-                        </Form.Item>
-                        <Form.Item
-                            label="买入时间"
-                            style={{ width: 425 }}
-                        >
-                            <Form.Item
-                                style={{
-                                    display: 'inline-block',
-                                    width: 'calc(50% - 12px)',
-                                    marginRight: 0
-                                }}
-                                name="start"
-                            >
-                                <DatePicker placeholder="起始时间" style={{ width: 130 }} />
-                            </Form.Item>
-                            <span
-                                style={{
-                                    display: 'inline-block',
-                                    width: '24px',
-                                    lineHeight: '32px',
-                                    textAlign: 'center',
-                                }}
-                            > - </span>
-                            <Form.Item
-                                style={{
-                                    display: 'inline-block',
-                                    width: 'calc(50% - 12px)',
-                                    marginRight: 0
-                                }}
-                                name="end"
-                            >
-                                <DatePicker placeholder="终止时间" style={{ width: 130 }} />
-                            </Form.Item>
-                        </Form.Item>
-                        <Form.Item label="库存" name="stock">
-                            <Select style={{ width: 100 }}>
-                                <Select.Option value="all">全部</Select.Option>
-                                <Select.Option value="sold">已卖</Select.Option>
-                                <Select.Option value="deposit">已收定金</Select.Option>
-                                <Select.Option value="notsold">未卖</Select.Option>
-                            </Select>
-                        </Form.Item>
-                        <Form.Item>
-                            <Button type="primary">查询</Button>
-                        </Form.Item>
-                        <Form.Item>
-                            <Button onClick={this.onReset}>重置</Button>
-                        </Form.Item>
-                    </Form>
-                </Card>
+                <Search dataSource={this.state.dataSource} handleSearch={this.handleSearch} request={this.request} />
                 <Card className="inner-table">
                     <div className="btn-container">
                         <Button type="primary" onClick={this.onOpenAdd}>添加记录</Button>
@@ -654,7 +600,11 @@ export default class Table extends React.Component {
                             <Form.Item label="卖出价" name="soldPrice">
                                 <InputNumber min={0} style={{ 'width': '100%' }} />
                             </Form.Item>
-                            <Form.Item label="买入时间" name="buyDate">
+                            <Form.Item
+                                label="买入时间"
+                                name="buyDate"
+                                rules={[{ required: true, message: '买入价必须填写!' }]}
+                            >
                                 <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
                             </Form.Item>
                             <Form.Item label="卖出时间" name="soldDate">
@@ -753,8 +703,15 @@ export default class Table extends React.Component {
                             <Form.Item label="卖出价" name="soldPrice">
                                 <InputNumber min={0} style={{ 'width': '100%' }} />
                             </Form.Item>
-                            <Form.Item label="买入时间" name="buyDate">
-                                <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
+                            <Form.Item
+                                label="买入时间"
+                                name="buyDate"
+                                rules={[{ required: true, message: '买入价必须填写!' }]}
+                            >
+                                <DatePicker
+                                    style={{ width: "100%" }}
+                                    placeholder="请选择时间"
+                                />
                             </Form.Item>
                             <Form.Item label="卖出时间" name="soldDate">
                                 <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />

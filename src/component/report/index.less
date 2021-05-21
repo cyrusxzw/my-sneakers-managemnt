@@ -1,0 +1,49 @@
+.report-container {
+  padding: 20px;
+  background-color: #f0efef;
+  .top {
+    .ant-card {
+      min-height: 270px;
+    }
+    .statusIcon {
+      display: none;
+    }
+    .ant-card-head-title {
+      font-size: 13px;
+    }
+    .ant-card-head {
+      border-bottom: 0;
+      margin-bottom: -10px;
+    }
+    .ant-card-body {
+      padding-top: 0;
+      .total {
+        font-size: 26px;
+        padding-bottom: 10px;
+      }
+      .monthSale {
+        padding: 10px 0 20px 0;
+      }
+      .monthCompare {
+        border: 0;
+        padding: 0 0 10px 0;
+      }
+      .average {
+        padding: 15px 0;
+        border-top: 1px solid lightgrey;
+      }
+      .profit-month {
+        display: flex;
+        align-items: center;
+        canvas {
+          max-height: 150px;
+          max-width: 180px;
+        }
+        .g2-html-annotation {
+          font-size: 14px !important;
+          text-shadow: none !important;
+        }
+      }
+    }
+  }
+}

@@ -3,8 +3,7 @@ import './index.less';
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu } from 'antd';
-import { AppstoreOutlined, SettingOutlined } from '@ant-design/icons';
-const { SubMenu } = Menu;
+import { HomeOutlined, AppstoreOutlined, SettingOutlined } from '@ant-design/icons';
 
 
 export default class Sidebar extends React.Component {
@@ -48,16 +47,11 @@ export default class Sidebar extends React.Component {
     render() {
         return (
             <div>
-                <NavLink to="/"><Logo /></NavLink>
+                <Logo />
                 <Menu mode="inline" inlineCollapsed={this.state.collapsed} className="menu-container" theme={this.state.theme} style={{ height: "100vh" }}>
-                    <SubMenu key="sub2" icon={<AppstoreOutlined />} title="管理">
-                        <Menu.Item key="1"><NavLink to="/managment">数据统计</NavLink></Menu.Item>
-                        <Menu.Item key="2">正在开发中</Menu.Item>
-                    </SubMenu>
-                    <SubMenu key="sub1" icon={<SettingOutlined />} title="数据分析">
-                        <Menu.Item key="3">报告</Menu.Item>
-                        <Menu.Item key="4">图表</Menu.Item>
-                    </SubMenu>
+                    <Menu.Item className="menu-title" key="1" icon={<HomeOutlined />}><NavLink to="/">首页</NavLink></Menu.Item>
+                    <Menu.Item className="menu-title" key="2" icon={<AppstoreOutlined />}><NavLink to="/managment">数据统计</NavLink></Menu.Item>
+                    <Menu.Item className="menu-title" key="3" icon={<SettingOutlined />}><NavLink to="/report">数据分析</NavLink></Menu.Item>
                 </Menu>
             </div>
         )
