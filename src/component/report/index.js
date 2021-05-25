@@ -305,7 +305,7 @@ export default class Report extends React.Component {
                 <Row className="middle">
                     <Col span={24}>
                         <Card title="利润趋势统计">
-
+                            123
                         </Card>
                     </Col>
                 </Row>
