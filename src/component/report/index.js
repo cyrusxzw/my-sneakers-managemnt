@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col, Card } from 'antd';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
-import { Liquid } from '@ant-design/charts';
+import { Liquid, Column, Line } from '@ant-design/charts';
 import axios from 'axios';
 import moment from 'moment';
 import Util from '../../utils';
@@ -139,9 +139,86 @@ export default class Report extends React.Component {
         return totalMonthProfit;
     }
 
+    totalBuy = (data) => {
+        const total = data.length;
+        if (data.length > 0) {
+            return total;
+        }
+        else {
+            return "";
+        }
+    }
+
+    totalSold = (data) => {
+        const solds = data.filter(item => !!item.acf.sold_date);
+        if (solds.length !== 0) {
+            return solds.length;
+        } else {
+            return "";
+        }
+    }
+
+    dataForTotalBuyChart = (data) => {
+        if (data.length > 0) {
+            const buydates = data.map(item => moment(item.acf.buy_date, 'DD-MM-YYYY').format('M'));
+            buydates.sort();
+            let tempArr = [];
+            for (let i = 0; i < buydates.length; i++) {
+                let count = 0;
+                for (let j = 0; j < buydates.length; j++) {
+                    if (buydates[i] === buydates[j]) {
+                        count++;
+                    }
+                }
+                tempArr.push([buydates[i], count]);
+            }
+            const chartData = tempArr.map((item) => {
+                const obj = {
+                    月份: item[0],
+                    购买数量: item[1]
+                }
+                return obj;
+            })
+            return chartData;
+        } else {
+            console.log("暂时无数据！");
+            return ""
+        }
+    }
+
+    dataForTotalSoldChart = (data) => {
+        if (data.length > 0) {
+            let solddates = data.map(item => moment(item.acf.sold_date, 'DD-MM-YYYY').format('M'));
+            solddates = solddates.filter(item => item !== "Invalid date");
+            solddates.sort();
+            let tempArr = [];
+            for (let i = 0; i < solddates.length; i++) {
+                let count = 0;
+                for (let j = 0; j < solddates.length; j++) {
+                    if (solddates[i] === solddates[j]) {
+                        count++;
+                    }
+                }
+                tempArr.push([solddates[i], count]);
+            }
+            const chartData = tempArr.map((item) => {
+                const obj = {
+                    月份: item[0],
+                    卖出数量: item[1]
+                }
+                return obj;
+            })
+            return chartData;
+        } else {
+            console.log("暂时无数据！");
+            return ""
+        }
+    }
+
+
     render() {
         const { data } = this.state;
-        const config = {
+        const liquidConfig = {
             percent: this.currentMonthProfit(data) / this.totalProfit(data) || 0,
             outline: {
                 border: 4,
@@ -156,6 +233,42 @@ export default class Report extends React.Component {
                 }
             }
         }
+        const columnConfig1 = {
+            height: 150,
+            tooltip: {
+                customContent: (title, data) => {
+                    return `<div>${title}月, 购买了${data[0] ? data[0].value : ""}双</div>`;
+                }
+            },
+            data: this.dataForTotalBuyChart(data) || [],
+            xField: '月份',
+            yField: '购买数量',
+            label: {
+                position: 'middle',
+                style: {
+                    fill: '#FFFFFF',
+                    opacity: 0.6,
+                },
+            }
+        };
+        const columnConfig2 = {
+            height: 150,
+            tooltip: {
+                customContent: (title, data) => {
+                    return `<div>${title}月, 卖出了${data[0] ? data[0].value : ""}双</div>`;
+                }
+            },
+            data: this.dataForTotalSoldChart(data) || [],
+            xField: '月份',
+            yField: '卖出数量',
+            label: {
+                position: 'middle',
+                style: {
+                    fill: '#FFFFFF',
+                    opacity: 0.6,
+                },
+            }
+        };
         return (
             <div className="report-container">
                 <Row className="top">
@@ -163,7 +276,7 @@ export default class Report extends React.Component {
                         <Card title="总销售额">
                             <div className="total">{`$ ${this.totalSale(data)}`}</div>
                             <div className="monthSale">{`本月销售额 $${this.currentMonthSale(data)}`}</div>
-                            <div className="monthCompare">{`比上月 \u00A0\u00A0 ${this.monthCompare(data)}%`}<CaretUpOutlined className="statusIcon" style={{ display: this.monthCompare(data) < 0 ? "none" : "inline-block", color: 'green' }} /><CaretDownOutlined className="statusIcon" style={{ display: this.monthCompare(data) >= 0 ? "none" : "inline-block", color: 'green' }} /></div>
+                            <div className="monthCompare">{`比上月 \u00A0\u00A0 ${this.monthCompare(data)}%`}<CaretUpOutlined className="statusIcon" style={{ display: this.monthCompare(data) < 0 ? "none" : "inline-block", color: 'red' }} /><CaretDownOutlined className="statusIcon" style={{ display: this.monthCompare(data) >= 0 ? "none" : "inline-block", color: 'green' }} /></div>
                             <div className="average">{`月均销售额 $${this.averageSale(data)}`}</div>
                         </Card>
                     </Col>
@@ -172,17 +285,26 @@ export default class Report extends React.Component {
                             <div className="total">{`$ ${this.totalProfit(data)}`}</div>
                             <div className="profit-month">
                                 <p>{`本月利润 $${this.currentMonthProfit(data)}`}</p>
-                                <Liquid {...config} />
+                                <Liquid {...liquidConfig} />
                             </div>
                         </Card>
                     </Col>
                     <Col span={6}>
-                        <Card title="购买数量">
-
+                        <Card title="购买总量">
+                            <div className="total">{`${this.totalBuy(data)}`}</div>
+                            <Column {...columnConfig1} />
                         </Card>
                     </Col>
                     <Col span={6}>
-                        <Card title="卖出数量">
+                        <Card title="卖出总量">
+                            <div className="total">{`${this.totalSold(data)}`}</div>
+                            <Line {...columnConfig2} />
+                        </Card>
+                    </Col>
+                </Row>
+                <Row className="middle">
+                    <Col span={24}>
+                        <Card title="利润趋势统计">
 
                         </Card>
                     </Col>
