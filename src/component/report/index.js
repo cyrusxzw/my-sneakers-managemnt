@@ -20,7 +20,7 @@ export default class Report extends React.Component {
 
     asyncGet = () => {
         Axios.ajax({
-            url: "http://solegood.com.au/wp-json/wp/v2/posts",
+            url: "https://solegood.com.au/wp-json/wp/v2/posts",
             method: "get",
             isShowLoading: true
         }).then((res) => {
@@ -28,7 +28,7 @@ export default class Report extends React.Component {
             const allData = totalPages.map((page) => {
                 return (
                     Axios.ajax({
-                        url: `http://solegood.com.au/wp-json/wp/v2/posts?page=${page}`,
+                        url: `https://solegood.com.au/wp-json/wp/v2/posts?page=${page}`,
                         method: "get",
                         isShowLoading: true
                     })

@@ -45,7 +45,7 @@ export default class Table extends React.Component {
 
     request = () => {
         Axios.ajax({
-            url: "http://solegood.com.au/wp-json/wp/v2/posts",
+            url: "https://solegood.com.au/wp-json/wp/v2/posts",
             method: "get",
             isShowLoading: true
         }).then((res) => {
@@ -54,7 +54,7 @@ export default class Table extends React.Component {
             const allData = totalPages.map((page) => {
                 return (
                     Axios.ajax({
-                        url: `http://solegood.com.au/wp-json/wp/v2/posts?page=${page}`,
+                        url: `https://solegood.com.au/wp-json/wp/v2/posts?page=${page}`,
                         method: "get",
                         isShowLoading: true
                     })
@@ -97,7 +97,7 @@ export default class Table extends React.Component {
 
     authentic = () => {
         Axios.ajax({
-            url: 'http://solegood.com.au/wp-json/jwt-auth/v1/token',
+            url: 'https://solegood.com.au/wp-json/jwt-auth/v1/token',
             method: 'post',
             isShowLoading: false,
             data: {
@@ -132,7 +132,7 @@ export default class Table extends React.Component {
     addNewSneaker = (record) => {
         const { authenticKey } = this.state;
         Axios.ajax({
-            url: 'http://solegood.com.au/wp-json/wp/v2/posts',
+            url: 'https://solegood.com.au/wp-json/wp/v2/posts',
             method: 'post',
             isShowLoading: false,
             headers: {
@@ -184,7 +184,7 @@ export default class Table extends React.Component {
         const allRequests = ids.map((item) => {
             return (
                 Axios.ajax({
-                    url: `http://solegood.com.au/wp-json/wp/v2/posts/${item}?force=true`,
+                    url: `https://solegood.com.au/wp-json/wp/v2/posts/${item}?force=true`,
                     isShowLoading: true,
                     method: 'delete',
                     headers: {
@@ -286,7 +286,7 @@ export default class Table extends React.Component {
             editVisible: false
         })
         Axios.ajax({
-            url: `http://solegood.com.au/wp-json/wp/v2/posts/${postId}`,
+            url: `https://solegood.com.au/wp-json/wp/v2/posts/${postId}`,
             method: 'put',
             isShowLoading: false,
             headers: {
