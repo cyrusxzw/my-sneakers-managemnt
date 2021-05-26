@@ -1,4 +1,5 @@
 {
+  "homepage": "https://cyrusxzw.github.io/my-sneakers-managemnt",
   "name": "my-sneakers",
   "version": "0.1.0",
   "private": true,
@@ -79,6 +80,8 @@
     "workbox-webpack-plugin": "5.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+  "deploy": "gh-pages -d build",
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js"
@@ -167,5 +170,8 @@
     "presets": [
       "react-app"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^3.2.0"
   }
 }
