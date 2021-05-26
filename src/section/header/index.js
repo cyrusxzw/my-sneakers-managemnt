@@ -53,7 +53,7 @@ export default class Header extends React.Component {
                             {this.state.weather}
                         </span>
                         <span className="weather-temperature">
-                            {this.state.temperature}℃
+                            {/* {this.state.temperature}℃ */}
                         </span>
                     </Col>
                 </Row>
