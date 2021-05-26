@@ -210,11 +210,46 @@ export default class Report extends React.Component {
             })
             return chartData;
         } else {
-            console.log("暂时无数据！");
             return ""
         }
     }
 
+    dataForProfitChart = (data) => {
+        if (data.length > 0) {
+            const tempArr = data.map(item => {
+                if (item.acf.buy_price) {
+                    item = {
+                        month: moment(item.acf.buy_date, 'DD-MM-YYYY').format('M'),
+                        profit: item.acf.sold_price ? (item.acf.sold_price - item.acf.buy_price) : (0 - item.acf.buy_price)
+                    }
+                    return item;
+                } else {
+                    console.log("检查买入价是否为空！")
+                    return "";
+                }
+            })
+            tempArr.sort((a, b) => {
+                return a.month - b.month;
+            });
+            let holder = {};
+            tempArr.forEach(e => {
+                if (holder.hasOwnProperty(e.month)) {
+                    holder[e.month] = holder[e.month] + e.profit;
+                } else {
+                    holder[e.month] = e.profit;
+                }
+            });
+            //console.log(holder)
+            let prepData = [];
+            for (let prop in holder) {
+                prepData.push({ 月份: prop, 利润: holder[prop] });
+            }
+            return prepData;
+        } else {
+            console.log("暂时无数据！");
+            return ""
+        }
+    }
 
     render() {
         const { data } = this.state;
@@ -269,6 +304,33 @@ export default class Report extends React.Component {
                 },
             }
         };
+        const config = {
+            data: this.dataForProfitChart(data) || [],
+            xField: '月份',
+            yField: '利润',
+            tooltip: {
+                customContent: (title, data) => {
+                    return `<div>利润：$${data[0] ? data[0].value : ""}</div>`;
+                }
+            },
+            point: {
+                visible: true,
+                size: 5,
+                shape: 'diamond',
+                style: {
+                    fill: 'white',
+                    stroke: '#2593fc',
+                    lineWidth: 2,
+                },
+            },
+            label: {
+                position: 'middle',
+                style: {
+                    fill: '#000000',
+                },
+            }
+        };
+
         return (
             <div className="report-container">
                 <Row className="top">
@@ -305,7 +367,7 @@ export default class Report extends React.Component {
                 <Row className="middle">
                     <Col span={24}>
                         <Card title="利润趋势统计">
-                            123
+                            <Line {...config} />
                         </Card>
                     </Col>
                 </Row>
