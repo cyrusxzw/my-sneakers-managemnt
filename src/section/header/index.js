@@ -12,13 +12,13 @@ export default class Header extends React.Component {
     }
 
     componentDidMount() {
-        this.getWeatherAPIData();
+        //this.getWeatherAPIData();
     }
 
     getWeatherAPIData() {
         let city = 'melbourne';
         Axios.ajax({
-            url: `http://api.weatherstack.com/current?access_key=a8503431d7eeae0100eb9f9439f07018&query=${city}`
+            url: `https://api.weatherstack.com/current?access_key=a8503431d7eeae0100eb9f9439f07018&query=${city}`
         }).then((res) => {
             window.data = res;
             if (res.status === 200) {
