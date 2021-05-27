@@ -65,11 +65,13 @@ export default class Table extends React.Component {
                 if (isOK) {
                     const tempArr = [...responses.map(item => item.data)];
                     const arr = tempArr.flat();
+                    let totalLength = arr.length;
+                    //console.log(totalLength)
                     const list = arr.map((item, index) => {
                         item.key = index;
                         item = {
                             ...item,
-                            newId: index + 1
+                            newId: totalLength - index
                         }
                         return item;
                     })
