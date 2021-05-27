@@ -11,6 +11,7 @@ const util = {
             onChange: (current) => {
                 callback(current);
             },
+            pageSizeOptions: [10],
             current: currentPage,
             pageSize: 10,
             total: totalPage,

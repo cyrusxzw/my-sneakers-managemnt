@@ -279,7 +279,7 @@ export default class Table extends React.Component {
         if (record.buyDate) {
             record.buyDate.add(1, "day");
         }
-        if (record.soldDate !== "") {
+        if (!!record.soldDate) {
             record.soldDate.add(1, "day");
         }
         this.setState({
@@ -316,11 +316,20 @@ export default class Table extends React.Component {
     }
 
     onSelectChange = (selectedRowKeys, selectedRows) => {
-        this.setState({
-            selectedRowKeys,
-            selectedRows,
-            buttonDisabled: false
-        });
+        console.log(selectedRowKeys.length)
+        if (selectedRowKeys.length === 0) {
+            this.setState({
+                selectedRowKeys,
+                selectedRows,
+                buttonDisabled: true
+            });
+        } else {
+            this.setState({
+                selectedRowKeys,
+                selectedRows,
+                buttonDisabled: false
+            });
+        }
     };
 
     onRowClick = (record) => {
@@ -416,6 +425,9 @@ export default class Table extends React.Component {
                 key: 'buyDate',
                 render: (acf) => {
                     return acf.buy_date
+                },
+                sorter: (a, b) => {
+                    return moment(a.acf.buy_date, 'DD-MM-YYYY').unix() - moment(b.acf.buy_date, 'DD-MM-YYYY').unix()
                 }
             },
             {
