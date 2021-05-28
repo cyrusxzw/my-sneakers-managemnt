@@ -1,6 +1,7 @@
 import './index.less';
 import React from 'react';
 import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col, message, InputNumber } from 'antd';
+import Draggable from 'react-draggable';
 import moment from 'moment';
 import Axios from '../../axios';
 import axios from 'axios';
@@ -22,8 +23,27 @@ export default class Table extends React.Component {
         addVisible: false,
         deleteConfirmVisible: false,
         buttonDisabled: true,
-        hiddenDeposit: true
+        hiddenDeposit: true,
+        disabled: true,
+        bounds: { left: 0, top: 0, bottom: 0, right: 0 },
     }
+    //拖拽
+
+    draggleRef = React.createRef();
+
+    onStart = (event, uiData) => {
+        const { clientWidth, clientHeight } = window?.document?.documentElement;
+        const targetRect = this.draggleRef?.current?.getBoundingClientRect();
+        this.setState({
+            bounds: {
+                left: -targetRect?.left + uiData?.x,
+                right: clientWidth - (targetRect?.right - uiData?.x),
+                top: -targetRect?.top + uiData?.y,
+                bottom: clientHeight - (targetRect?.bottom - uiData?.y),
+            },
+        });
+        console.log("123")
+    };
 
     formItemLayout = {
         labelCol: {
@@ -551,8 +571,32 @@ export default class Table extends React.Component {
                     />
                 </Card>
                 <Modal
-                    title="添加记录"
                     visible={this.state.addVisible}
+                    title={
+                        <div
+                            style={{
+                                width: '100%',
+                                cursor: 'move',
+                            }}
+                            onMouseOver={() => {
+                                if (disabled) {
+                                    this.setState({
+                                        disabled: false,
+                                    });
+                                }
+                            }}
+                            onMouseOut={() => {
+                                this.setState({
+                                    disabled: true,
+                                });
+                            }}
+                            onFocus={() => { }}
+                            onBlur={() => { }}
+                        // end
+                        >
+                            添加记录
+                        </div>
+                    }
                     onCancel={() => {
                         this.setState({
                             addVisible: false
@@ -572,6 +616,15 @@ export default class Table extends React.Component {
                             </Button>
                         ]
                     }
+                    modalRender={modal => (
+                        <Draggable
+                            disabled={this.state.disabled}
+                            bounds={this.state.bounds}
+                            onStart={(event, uiData) => this.onStart(event, uiData)}
+                        >
+                            <div ref={this.draggleRef}>{modal}</div>
+                        </Draggable>
+                    )}
                 >
                     <div className="add-content-container">
                         <Form
