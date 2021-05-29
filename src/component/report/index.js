@@ -150,7 +150,7 @@ export default class Report extends React.Component {
     }
 
     totalSold = (data) => {
-        const solds = data.filter(item => !!item.acf.sold_date);
+        const solds = data.filter(item => item.acf.status === "已卖");
         if (solds.length !== 0) {
             return solds.length;
         } else {
@@ -188,27 +188,34 @@ export default class Report extends React.Component {
 
     dataForTotalSoldChart = (data) => {
         if (data.length > 0) {
-            let solddates = data.map(item => moment(item.acf.sold_date, 'DD-MM-YYYY').format('M'));
-            solddates = solddates.filter(item => item !== "Invalid date");
-            solddates.sort();
-            let tempArr = [];
-            for (let i = 0; i < solddates.length; i++) {
+            const monthAndSold = data.map((item) => {
+                const newItem = {
+                    month: moment(item.acf.buy_date, 'DD-MM-YYYY').format('M'),
+                    status: item.acf.status
+                }
+                return newItem;
+            })
+            const tempArr = monthAndSold.filter(e => e.status === "已卖");
+            const monthAmount = tempArr.map(item => item.month);
+            monthAmount.sort();
+            let tempCount = [];
+            for (let i = 0; i < monthAmount.length;) {
                 let count = 0;
-                for (let j = 0; j < solddates.length; j++) {
-                    if (solddates[i] === solddates[j]) {
+                for (let j = 0; j < monthAmount.length; j++) {
+                    if (monthAmount[i] === monthAmount[j]) {
                         count++;
                     }
                 }
-                tempArr.push([solddates[i], count]);
+                tempCount.push([monthAmount[i], count]);
+                i += count;
             }
-            const chartData = tempArr.map((item) => {
-                const obj = {
+            const prepData = tempCount.map(item => {
+                return {
                     月份: item[0],
                     卖出数量: item[1]
                 }
-                return obj;
             })
-            return chartData;
+            return prepData;
         } else {
             return ""
         }
@@ -324,10 +331,11 @@ export default class Report extends React.Component {
                 },
             },
             label: {
-                position: 'middle',
+                position: 'left',
                 style: {
                     fill: '#000000',
                 },
+                offsetY: -10,
             }
         };
 
