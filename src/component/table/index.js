@@ -42,7 +42,6 @@ export default class Table extends React.Component {
                 bottom: clientHeight - (targetRect?.bottom - uiData?.y),
             },
         });
-        console.log("123")
     };
 
     formItemLayout = {
@@ -223,6 +222,7 @@ export default class Table extends React.Component {
                 this.setState({
                     selectedRowKeys: [],
                     selectedRows: [],
+                    deleteConfirmVisible: false,
                     buttonDisabled: true
                 })
                 this.request();
