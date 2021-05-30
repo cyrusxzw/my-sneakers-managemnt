@@ -79,14 +79,14 @@ export default class Report extends React.Component {
 
     currentMonthSale = (data) => {
         const totalThisMonthArr = data.map((item) => {
-            if (item.acf.sold_date && moment(item.acf.sold_date, 'DD-MM-YYYY').isSame(moment(), 'month')) {
+            if (item.acf.sold_date && moment(item.acf.buy_date, 'DD-MM-YYYY').month() === moment().month()) {
                 return item.acf.sold_price
             } else {
                 return "0"
             }
         })
         let totalThisMonth = 0;
-        for (const item of totalThisMonthArr) {
+        for (let item of totalThisMonthArr) {
             totalThisMonth = +totalThisMonth + +item;
         }
         return totalThisMonth;
@@ -94,7 +94,7 @@ export default class Report extends React.Component {
 
     monthCompare = (data) => {
         const totalLastMonthArr = data.map((item) => {
-            if (item.acf.sold_date && moment(item.acf.sold_date, 'DD-MM-YYYY').isSame(moment().subtract(1, 'months').endOf('month'), 'month')) {
+            if (item.acf.sold_date && moment(item.acf.buy_date, 'DD-MM-YYYY').isSame(moment().subtract(1, 'months').endOf('month'), 'month')) {
                 return item.acf.sold_price
             } else {
                 return "0"
@@ -261,7 +261,7 @@ export default class Report extends React.Component {
     render() {
         const { data } = this.state;
         const liquidConfig = {
-            percent: this.currentMonthProfit(data) / this.totalProfit(data) || 0,
+            percent: ((this.currentMonthProfit(data) >= 0 ? this.currentMonthProfit(data) : 0) / this.totalProfit(data)) || 0,
             outline: {
                 border: 4,
                 distance: 8,
@@ -335,7 +335,7 @@ export default class Report extends React.Component {
                 style: {
                     fill: '#000000',
                 },
-                offsetY: -10,
+                offsetY: -5,
             }
         };
 
