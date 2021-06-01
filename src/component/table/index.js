@@ -1,12 +1,12 @@
 import './index.less';
 import React from 'react';
 import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col, message, InputNumber } from 'antd';
-import Draggable from 'react-draggable';
 import moment from 'moment';
 import Axios from '../../axios';
 import axios from 'axios';
 import Util from '../../utils';
 import Search from '../search.js';
+import Add from '../../action/add.js';
 
 export default class Table extends React.Component {
 
@@ -25,7 +25,6 @@ export default class Table extends React.Component {
         buttonDisabled: true,
         hiddenDeposit: true,
         disabled: true,
-        bounds: { left: 0, top: 0, bottom: 0, right: 0 },
     }
     //拖拽
 
@@ -59,7 +58,11 @@ export default class Table extends React.Component {
 
     componentDidMount() {
         this.request();
-        this.authentic();
+        Util.auth().then(key => {
+            this.setState({
+                authenticKey: key
+            })
+        })
     }
 
     request = () => {
@@ -116,39 +119,19 @@ export default class Table extends React.Component {
         })
     }
 
-    authentic = () => {
-        Axios.ajax({
-            url: 'https://solegood.com.au/wp-json/jwt-auth/v1/token',
-            method: 'post',
-            isShowLoading: false,
-            data: {
-                username: 'cyrusxzw',
-                password: 'P@55word!@#'
-            },
-            headers: {
-                'Content-Type': 'application/json',
-                'accept': 'application/json',
-            }
-        }).then(res => res.data)
-            .then((data) => {
-                this.setState({
-                    authenticKey: data.token
-                })
-            })
-    }
-
     formUpdate = React.createRef();
 
     onOpenAdd = () => {
         this.setState({
-            addVisible: true,
-            hiddenDeposit: true
+            addVisible: true
         })
     }
 
-    onFinish = (values) => {
-        this.addNewSneaker(values);
-    };
+    onCloseAdd = () => {
+        this.setState({
+            addVisible: false,
+        })
+    }
 
     addNewSneaker = (record) => {
         const { authenticKey } = this.state;
@@ -178,12 +161,16 @@ export default class Table extends React.Component {
                 }
             }
         }).then((res) => {
-            const sneaker = res.data.title.rendered;
             this.setState({
                 addVisible: false,
             })
-            this.request();
-            message.success(`鞋款: ${sneaker}，已经成功添加!`);
+            if (res.status === 201) {
+                const sneaker = res.data.title.rendered;
+                this.request();
+                message.success(`鞋款: ${sneaker}，已经成功添加!`);
+            } else {
+                message.error(`添加失败!`);
+            }
         })
     }
 
@@ -332,13 +319,16 @@ export default class Table extends React.Component {
                 }
             }
         }).then((res) => {
-            this.request();
-            message.success(`已经成功编辑!`);
+            if (res.status === 200) {
+                this.request();
+                message.success(`已经成功编辑!`);
+            } else {
+                message.error(`编辑失败!`);
+            }
         })
     }
 
     onSelectChange = (selectedRowKeys, selectedRows) => {
-        console.log(selectedRowKeys.length)
         if (selectedRowKeys.length === 0) {
             this.setState({
                 selectedRowKeys,
@@ -570,122 +560,7 @@ export default class Table extends React.Component {
                         }}
                     />
                 </Card>
-                <Modal
-                    visible={this.state.addVisible}
-                    title={
-                        <div
-                            style={{
-                                width: '100%',
-                                cursor: 'move',
-                            }}
-                            onMouseOver={() => {
-                                if (disabled) {
-                                    this.setState({
-                                        disabled: false,
-                                    });
-                                }
-                            }}
-                            onMouseOut={() => {
-                                this.setState({
-                                    disabled: true,
-                                });
-                            }}
-                            onFocus={() => { }}
-                            onBlur={() => { }}
-                        // end
-                        >
-                            添加记录
-                        </div>
-                    }
-                    onCancel={() => {
-                        this.setState({
-                            addVisible: false
-                        })
-                    }}
-                    footer={
-                        [
-                            <Button key="cancel" onClick={() => {
-                                this.setState({
-                                    addVisible: false
-                                })
-                            }}>
-                                取消
-                            </Button>,
-                            <Button form="addSneakerForm" key="submit" htmlType="submit">
-                                确定
-                            </Button>
-                        ]
-                    }
-                    modalRender={modal => (
-                        <Draggable
-                            disabled={this.state.disabled}
-                            bounds={this.state.bounds}
-                            onStart={(event, uiData) => this.onStart(event, uiData)}
-                        >
-                            <div ref={this.draggleRef}>{modal}</div>
-                        </Draggable>
-                    )}
-                >
-                    <div className="add-content-container">
-                        <Form
-                            id="addSneakerForm"
-                            onFinish={this.onFinish}
-                        >
-                            <Form.Item
-                                label="鞋款"
-                                name="sneaker"
-                                rules={[{ required: true, message: '产品名必须填写!' }]}>
-                                <Input />
-                            </Form.Item>
-                            <Form.Item label="尺码" name="size">
-                                <Input />
-                            </Form.Item>
-                            <Form.Item label="状态" name="status">
-                                <Select
-                                    placeholder="请选择"
-                                    onChange={this.onStatusChange}
-                                >
-                                    <Select.Option value="已卖">已卖</Select.Option>
-                                    <Select.Option value="已收定金">已收定金</Select.Option>
-                                    <Select.Option value="未卖">未卖</Select.Option>
-                                </Select>
-                            </Form.Item>
-                            <Form.Item
-                                hidden={this.state.hiddenDeposit}
-                                label="付了多少定金?"
-                                name="depositAmount"
-                            >
-                                <InputNumber min={0} style={{ 'width': '100%' }} />
-                            </Form.Item>
-                            <Form.Item
-                                label="买入价"
-                                name="buyPrice"
-                                rules={[{ required: true, message: '买入价必须填写!' }]}
-                            >
-                                <InputNumber min={0} style={{ 'width': '100%' }} />
-                            </Form.Item>
-                            <Form.Item label="卖出价" name="soldPrice">
-                                <InputNumber min={0} style={{ 'width': '100%' }} />
-                            </Form.Item>
-                            <Form.Item
-                                label="买入时间"
-                                name="buyDate"
-                                rules={[{ required: true, message: '买入价必须填写!' }]}
-                            >
-                                <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
-                            </Form.Item>
-                            <Form.Item label="卖出时间" name="soldDate">
-                                <DatePicker style={{ width: "100%" }} placeholder="请选择时间" />
-                            </Form.Item>
-                            <Form.Item label="买家" name="buyer">
-                                <Input />
-                            </Form.Item>
-                            <Form.Item label="备注" name="remarks">
-                                <Input />
-                            </Form.Item>
-                        </Form>
-                    </div>
-                </Modal>
+                <Add addNewSneaker={this.addNewSneaker} visible={this.state.addVisible} onCloseAdd={this.onCloseAdd} />
                 <Modal
                     title="删除记录"
                     visible={this.state.deleteConfirmVisible}
