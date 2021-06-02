@@ -3,7 +3,7 @@ import Draggable from 'react-draggable';
 import { Modal, Form, Input, Button, Select, DatePicker, InputNumber } from 'antd';
 
 
-export default class Add extends React.Component {
+export default class AddModal extends React.Component {
     state = {
         hiddenDeposit: true,
         disabled: true,

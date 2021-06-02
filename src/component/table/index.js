@@ -1,12 +1,13 @@
 import './index.less';
 import React from 'react';
-import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, Row, Col, message, InputNumber } from 'antd';
+import { Table as SneakerTable, Card, Modal, Form, Input, Button, Select, DatePicker, message, InputNumber } from 'antd';
 import moment from 'moment';
 import Axios from '../../axios';
 import axios from 'axios';
 import Util from '../../utils';
 import Search from '../search.js';
 import Add from '../../action/add.js';
+import Delete from '../../action/delete.js'
 
 export default class Table extends React.Component {
 
@@ -26,22 +27,6 @@ export default class Table extends React.Component {
         hiddenDeposit: true,
         disabled: true,
     }
-    //拖拽
-
-    draggleRef = React.createRef();
-
-    onStart = (event, uiData) => {
-        const { clientWidth, clientHeight } = window?.document?.documentElement;
-        const targetRect = this.draggleRef?.current?.getBoundingClientRect();
-        this.setState({
-            bounds: {
-                left: -targetRect?.left + uiData?.x,
-                right: clientWidth - (targetRect?.right - uiData?.x),
-                top: -targetRect?.top + uiData?.y,
-                bottom: clientHeight - (targetRect?.bottom - uiData?.y),
-            },
-        });
-    };
 
     formItemLayout = {
         labelCol: {
@@ -51,10 +36,6 @@ export default class Table extends React.Component {
             span: 16,
         },
     };
-
-    selectedLayout = {
-        span: 12
-    }
 
     componentDidMount() {
         this.request();
@@ -177,6 +158,12 @@ export default class Table extends React.Component {
     onOpenDelete = () => {
         this.setState({
             deleteConfirmVisible: true
+        })
+    }
+
+    onCloseDelete = () => {
+        this.setState({
+            deleteConfirmVisible: false
         })
     }
 
@@ -381,7 +368,7 @@ export default class Table extends React.Component {
     }
 
     render() {
-        const { selectedRowKeys, selectedRows, dataSource } = this.state;
+        const { selectedRowKeys, dataSource } = this.state;
         const columns = [
             {
                 title: 'id',
@@ -492,43 +479,6 @@ export default class Table extends React.Component {
             onChange: this.onSelectChange,
         };
 
-        const selectedContent = selectedRows.map((item, index) => {
-            const title = {
-                title: `所选鞋款 id: ${item.newId}`
-            }
-            return (
-                <div className="confrim-delete" key={index}>
-                    <Card {...title}>
-                        <Form>
-                            <Row>
-                                <Col {...this.selectedLayout}>
-                                    <Form.Item label="鞋款">
-                                        {item.title.rendered}
-                                    </Form.Item>
-                                </Col>
-                                <Col {...this.selectedLayout}>
-                                    <Form.Item label="尺码">
-                                        {item.acf.size}
-                                    </Form.Item>
-                                </Col>
-                                <Col {...this.selectedLayout}>
-                                    <Form.Item label="买入价格">
-                                        {item.acf.buy_price}
-                                    </Form.Item>
-                                </Col>
-                                <Col {...this.selectedLayout}>
-                                    <Form.Item label="是否卖出">
-                                        {item.acf.status}
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-                        </Form>
-                    </Card>
-
-                </div>
-            )
-        })
-
         const disabled = {
             disabled: this.state.buttonDisabled ? "disabled" : ""
         };
@@ -561,23 +511,7 @@ export default class Table extends React.Component {
                     />
                 </Card>
                 <Add addNewSneaker={this.addNewSneaker} visible={this.state.addVisible} onCloseAdd={this.onCloseAdd} />
-                <Modal
-                    title="删除记录"
-                    visible={this.state.deleteConfirmVisible}
-                    onCancel={() => {
-                        this.setState({
-                            deleteConfirmVisible: false
-                        })
-                    }}
-                    okText="确定"
-                    cancelText="取消"
-                    onOk={this.onDelete}
-                >
-                    <div className="delect-content-container">
-                        {selectedContent}
-                    </div>
-                </Modal>
-
+                <Delete onDelete={this.onDelete} onCloseDelete={this.onCloseDelete} selectedRows={this.state.selectedRows} visible={this.state.deleteConfirmVisible} />
                 <Modal
                     title="编辑记录"
                     visible={this.state.editVisible}
