@@ -7,7 +7,8 @@ import axios from 'axios';
 import Util from '../../utils';
 import Search from '../search.js';
 import Add from '../../action/add.js';
-import Delete from '../../action/delete.js'
+import Delete from '../../action/delete.js';
+import Excel from '../excel.js';
 
 export default class Table extends React.Component {
 
@@ -491,6 +492,7 @@ export default class Table extends React.Component {
                         <Button type="primary" onClick={this.onOpenAdd}>添加记录</Button>
                         <Button danger onClick={this.onOpenDelete} {...disabled}>删除记录</Button>
                         <Button type="primary" ghost onClick={this.onOpenEdit} {...disabled}>编辑记录</Button>
+                        <Excel data={this.state.dataSource} />
                     </div>
                     <SneakerTable
                         columns={columns}

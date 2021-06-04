@@ -12,23 +12,20 @@ export default class Header extends React.Component {
     }
 
     componentDidMount() {
-        //this.getWeatherAPIData();
+        this.getWeatherAPIData();
     }
 
     getWeatherAPIData() {
-        let city = 'melbourne';
+        const location = '101020100';
+        const key = '150a91117a2b479b81b25fc8d218e142';
         Axios.ajax({
-            url: `https://api.weatherstack.com/current?access_key=a8503431d7eeae0100eb9f9439f07018&query=${city}`
+            url: `https://devapi.qweather.com/v7/weather/now?location=${location}&key=${key}`
         }).then((res) => {
-            window.data = res;
-            if (res.status === 200) {
-                const data = res.data.current;
-                this.setState({
-                    picUrl: data.weather_icons[0],
-                    weather: data.weather_descriptions[0],
-                    temperature: data.temperature
-                })
-            }
+            const now = res.data.now;
+            this.setState({
+                weather: now.text,
+                temperature: now.temp
+            })
         })
     }
 
@@ -47,13 +44,13 @@ export default class Header extends React.Component {
                     </Col>
                     <Col span="20" className="weather">
                         <span className="weather-img">
-                            <img src={this.state.picUrl} alt="" />
+                            {/* <img src={this.state.picUrl} alt="" /> */}
                         </span>
                         <span className="weather-detail">
-                            {this.state.weather}
+                            上海：{this.state.weather}
                         </span>
                         <span className="weather-temperature">
-                            {/* {this.state.temperature}℃ */}
+                            {this.state.temperature}℃
                         </span>
                     </Col>
                 </Row>
