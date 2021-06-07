@@ -56,12 +56,12 @@ export default class Search extends React.Component {
                 onOk: () => { this.onReset() }
             });
         } else {
-            this.props.handleSearch(matchedData);
+            const total = matchedData.length;
+            this.props.handleSearch(matchedData, total);
         }
     }
 
     render() {
-
         return (
             <Card>
                 <Form

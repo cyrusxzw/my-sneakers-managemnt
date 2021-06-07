@@ -362,9 +362,10 @@ export default class Table extends React.Component {
         }
     }
 
-    handleSearch = (data) => {
+    handleSearch = (data, total) => {
         this.setState({
-            dataSource: data
+            dataSource: data,
+            totalRecords: total
         })
     }
 
