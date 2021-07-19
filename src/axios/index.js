@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { notification } from 'antd';
 import '../style/loading.less';
 
 export default class Axios {
@@ -21,7 +22,16 @@ export default class Axios {
                 } else {
                     reject(new Error("连接错误，无法访问数据！"))
                 }
-            }).catch(() => console.log("出错啦"))
+            }).catch(
+                (res) => {
+                    console.log(res.message);
+                    notification.error({
+
+                        message: `出错了！请刷新！`,
+                        description: `出错原因： ${res.message}`
+                    });
+                }
+            )
         })
     }
 }
