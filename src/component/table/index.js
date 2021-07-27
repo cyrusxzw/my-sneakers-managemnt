@@ -61,7 +61,7 @@ export default class Table extends React.Component {
                 title: "无访问权限",
                 content: "请先登录！",
                 onOk: () => {
-                    window.location.href = `${window.location.protocol}//${window.location.host}`
+                    window.location.replace('https://cyrusxzw.github.io/my-sneakers-managemnt/#')
                 }
             })
         }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col, Card } from 'antd';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
-import { Liquid, Column, Line } from '@ant-design/charts';
+import { Liquid, Column, Line, Modal } from '@ant-design/charts';
 import axios from 'axios';
 import moment from 'moment';
 import Util from '../../utils';
@@ -12,10 +12,30 @@ export default class Report extends React.Component {
 
     state = {
         data: [],
+        isLoggedin: false
     }
 
     componentDidMount() {
-        this.asyncGet();
+        this.checkLogin();
+    }
+
+    checkLogin = () => {
+        const userName = localStorage.userName;
+
+        if (userName) {
+            this.setState({
+                isLoggedin: true
+            })
+            this.asyncGet();
+        } else {
+            Modal.error({
+                title: "无访问权限",
+                content: "请先登录！",
+                onOk: () => {
+                    window.location.replace('https://cyrusxzw.github.io/my-sneakers-managemnt/#')
+                }
+            })
+        }
     }
 
     asyncGet = () => {
