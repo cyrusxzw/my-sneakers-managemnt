@@ -1,6 +1,7 @@
 import { HashRouter, Route } from 'react-router-dom';
 import { Row, Col } from 'antd';
-import Sidebar from './section/sidebar/index.js'
+import Sidebar from './section/sidebar'
+import Login from './component/login'
 import Table from './component/table';
 import Report from './component/report/';
 import Header from './section/header';
@@ -15,13 +16,7 @@ function App() {
         </Col>
         <Col span={21}>
           <Header />
-          <Route exact path="/" render={() => {
-            return (
-              <div className="home-container">
-                <h1>欢迎来到许增威的球鞋管理系统！</h1>
-              </div>
-            )
-          }} />
+          <Route exact path="/" component={Login} />
           <Route exact path="/managment" component={Table} />
           <Route exact path="/report" component={Report} />
         </Col>

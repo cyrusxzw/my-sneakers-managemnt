@@ -27,6 +27,7 @@ export default class Table extends React.Component {
         buttonDisabled: true,
         hiddenDeposit: true,
         disabled: true,
+        isLoggedin: false
     }
 
     formItemLayout = {
@@ -39,12 +40,31 @@ export default class Table extends React.Component {
     };
 
     componentDidMount() {
-        this.request();
-        Util.auth().then(key => {
+        this.checkLogin();
+    }
+
+    checkLogin = () => {
+        const userName = localStorage.userName;
+
+        if (userName) {
             this.setState({
-                authenticKey: key
+                isLoggedin: true
             })
-        })
+            this.request();
+            Util.auth().then(key => {
+                this.setState({
+                    authenticKey: key
+                })
+            })
+        } else {
+            Modal.error({
+                title: "无访问权限",
+                content: "请先登录！",
+                onOk: () => {
+                    window.location.href = `${window.location.protocol}//${window.location.host}`
+                }
+            })
+        }
     }
 
     request = () => {
@@ -370,7 +390,7 @@ export default class Table extends React.Component {
     }
 
     render() {
-        const { selectedRowKeys, dataSource } = this.state;
+        const { selectedRowKeys, dataSource, buttonDisabled } = this.state;
         const columns = [
             {
                 title: 'id',
@@ -482,8 +502,12 @@ export default class Table extends React.Component {
         };
 
         const disabled = {
-            disabled: this.state.buttonDisabled ? "disabled" : ""
+            disabled: buttonDisabled ? "disabled" : ""
         };
+
+        const updateDisabled = {
+            disabled: buttonDisabled || selectedRowKeys.length > 1 ? "disabled" : ""
+        }
 
         return (
             <div className="table-container">
@@ -492,7 +516,7 @@ export default class Table extends React.Component {
                     <div className="btn-container">
                         <Button type="primary" onClick={this.onOpenAdd}>添加记录</Button>
                         <Button danger onClick={this.onOpenDelete} {...disabled}>删除记录</Button>
-                        <Button type="primary" ghost onClick={this.onOpenEdit} {...disabled}>编辑记录</Button>
+                        <Button type="primary" ghost onClick={this.onOpenEdit} {...updateDisabled}>编辑记录</Button>
                         <Excel data={this.state.dataSource} />
                     </div>
                     <SneakerTable
