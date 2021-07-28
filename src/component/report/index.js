@@ -1,7 +1,7 @@
 import React from 'react';
-import { Row, Col, Card } from 'antd';
+import { Row, Col, Card, Modal } from 'antd';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
-import { Liquid, Column, Line, Modal } from '@ant-design/charts';
+import { Liquid, Column, Line } from '@ant-design/charts';
 import axios from 'axios';
 import moment from 'moment';
 import Util from '../../utils';

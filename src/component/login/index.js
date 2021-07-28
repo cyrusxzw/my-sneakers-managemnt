@@ -6,6 +6,13 @@ export default class Login extends React.Component {
     state = {
         isLoggedin: false
     }
+    componentDidMount() {
+        const userName = localStorage.userName;
+        console.log(userName)
+        if (userName) {
+            window.location.href = 'https://cyrusxzw.github.io/my-sneakers-managemnt/#/managment';
+        }
+    }
     onFinish = (values) => {
         const userName = values.username;
         const password = values.password;
@@ -16,6 +23,7 @@ export default class Login extends React.Component {
             this.setState({
                 isLoggedin: true
             })
+            window.location.href = 'https://cyrusxzw.github.io/my-sneakers-managemnt/#/managment';
         } else {
             Modal.error({
                 title: "登录失败",
@@ -30,14 +38,9 @@ export default class Login extends React.Component {
     render() {
         return (
             <div id="login-container">
-                <h2>欢迎来到许增威的球鞋管理系统！</h2>
+                <h2>欢迎来到许增威的球鞋管理系统</h2>
                 <div id="form-container">
-                    <Form labelCol={{
-                        span: 10,
-                    }}
-                        wrapperCol={{
-                            span: 6,
-                        }}
+                    <Form
                         onFinish={this.onFinish}
                         onFinishFailed={this.onFinishFailed}
                     >
@@ -66,10 +69,6 @@ export default class Login extends React.Component {
                             <Input.Password />
                         </Form.Item>
                         <Form.Item
-                            wrapperCol={{
-                                offset: 8,
-                                span: 15,
-                            }}
                         >
                             <Button type="primary" htmlType="submit">
                                 登录
