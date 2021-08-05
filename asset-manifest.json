@@ -1,27 +1,27 @@
 {
   "files": {
-    "main.css": "/my-sneakers-managemnt/static/css/main.f2888e0e.chunk.css",
-    "main.js": "/my-sneakers-managemnt/static/js/main.4ee0a207.chunk.js",
-    "main.js.map": "/my-sneakers-managemnt/static/js/main.4ee0a207.chunk.js.map",
-    "runtime-main.js": "/my-sneakers-managemnt/static/js/runtime-main.c41ee7f8.js",
-    "runtime-main.js.map": "/my-sneakers-managemnt/static/js/runtime-main.c41ee7f8.js.map",
-    "static/css/2.bac6bf5f.chunk.css": "/my-sneakers-managemnt/static/css/2.bac6bf5f.chunk.css",
-    "static/js/2.6d6e70d7.chunk.js": "/my-sneakers-managemnt/static/js/2.6d6e70d7.chunk.js",
-    "static/js/2.6d6e70d7.chunk.js.map": "/my-sneakers-managemnt/static/js/2.6d6e70d7.chunk.js.map",
-    "static/js/3.be21bd26.chunk.js": "/my-sneakers-managemnt/static/js/3.be21bd26.chunk.js",
-    "static/js/3.be21bd26.chunk.js.map": "/my-sneakers-managemnt/static/js/3.be21bd26.chunk.js.map",
+    "main.css": "/my-sneakers-managemnt/static/css/main.381b7b37.chunk.css",
+    "main.js": "/my-sneakers-managemnt/static/js/main.2b4fc99d.chunk.js",
+    "main.js.map": "/my-sneakers-managemnt/static/js/main.2b4fc99d.chunk.js.map",
+    "runtime-main.js": "/my-sneakers-managemnt/static/js/runtime-main.df5572ad.js",
+    "runtime-main.js.map": "/my-sneakers-managemnt/static/js/runtime-main.df5572ad.js.map",
+    "static/css/2.d9ea78de.chunk.css": "/my-sneakers-managemnt/static/css/2.d9ea78de.chunk.css",
+    "static/js/2.9e6f7cd4.chunk.js": "/my-sneakers-managemnt/static/js/2.9e6f7cd4.chunk.js",
+    "static/js/2.9e6f7cd4.chunk.js.map": "/my-sneakers-managemnt/static/js/2.9e6f7cd4.chunk.js.map",
+    "static/js/3.d406aeb1.chunk.js": "/my-sneakers-managemnt/static/js/3.d406aeb1.chunk.js",
+    "static/js/3.d406aeb1.chunk.js.map": "/my-sneakers-managemnt/static/js/3.d406aeb1.chunk.js.map",
     "index.html": "/my-sneakers-managemnt/index.html",
-    "static/css/2.bac6bf5f.chunk.css.map": "/my-sneakers-managemnt/static/css/2.bac6bf5f.chunk.css.map",
-    "static/css/main.f2888e0e.chunk.css.map": "/my-sneakers-managemnt/static/css/main.f2888e0e.chunk.css.map",
-    "static/js/2.6d6e70d7.chunk.js.LICENSE.txt": "/my-sneakers-managemnt/static/js/2.6d6e70d7.chunk.js.LICENSE.txt",
+    "static/css/2.d9ea78de.chunk.css.map": "/my-sneakers-managemnt/static/css/2.d9ea78de.chunk.css.map",
+    "static/css/main.381b7b37.chunk.css.map": "/my-sneakers-managemnt/static/css/main.381b7b37.chunk.css.map",
+    "static/js/2.9e6f7cd4.chunk.js.LICENSE.txt": "/my-sneakers-managemnt/static/js/2.9e6f7cd4.chunk.js.LICENSE.txt",
     "static/media/index.less": "/my-sneakers-managemnt/static/media/background.e2e29bb5.jpg",
     "static/media/logo.01ef544c.svg": "/my-sneakers-managemnt/static/media/logo.01ef544c.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.c41ee7f8.js",
-    "static/css/2.bac6bf5f.chunk.css",
-    "static/js/2.6d6e70d7.chunk.js",
-    "static/css/main.f2888e0e.chunk.css",
-    "static/js/main.4ee0a207.chunk.js"
+    "static/js/runtime-main.df5572ad.js",
+    "static/css/2.d9ea78de.chunk.css",
+    "static/js/2.9e6f7cd4.chunk.js",
+    "static/css/main.381b7b37.chunk.css",
+    "static/js/main.2b4fc99d.chunk.js"
   ]
 }
